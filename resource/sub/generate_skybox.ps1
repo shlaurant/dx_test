@@ -1,0 +1,1 @@
+./texassemble cube -w 512 -h 512 -o skybox.dds right.bmp left.bmp top.bmp bottom.bmp front.bmp back.bmp
