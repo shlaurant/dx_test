@@ -46,8 +46,8 @@ void GS_Main(point VS_OUT input[1], uint id:SV_PrimitiveID, inout TriangleStream
     GS_OUT gout;
 
     gout.position = float4(input[0].position + (input[0].size.x / 2) * left, 1.f);
+    gout.pos_w = mul(gout.position, w);
     gout.position = mul(gout.position, wvp);
-    gout.pos_w = gout.position;
     gout.normal = look;
     gout.uv = float2(0.f, 1.f);
     gout.id = id;

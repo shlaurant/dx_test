@@ -1,5 +1,6 @@
 #include "light.hlsl"
 #include "register.hlsl"
+#include "shadow_util.hlsl"
 
 Texture2D tex : register(t2);
 
@@ -30,9 +31,9 @@ VS_OUT VS_Main(VS_IN input)
     float4x4 world = w;
 #endif
 
+    output.pos_w = mul(float4(input.pos, 1.0f), world);
     float4x4 wvp = mul(world, vp);
     output.pos = mul(float4(input.pos, 1.0f), wvp);
-    output.pos_w = output.pos;
     output.uv = input.uv;
     output.normal = mul(input.normal, (float3x3)world);
 
@@ -48,10 +49,12 @@ float4 PS_Main(VS_OUT input) : SV_Target
     float4 color = float4(0.f, 0.f, 0.f, 0.5f);
 #else
     input.normal = normalize(input.normal);
+    float4 shadow_pos = mul(input.pos_w, shadow_uv_matrix);
+    float shadow_factor = calc_shadow_factor(shadow_pos);
 
     material new_mat = {diffuse_albedo, materials[obj_pad0].fresnel_r0, materials[obj_pad0].roughness};
     float3 to_eye = normalize(camera_pos - input.pos_w.xyz);
-    float4 light_color = calc_light(lights, active_light_counts, new_mat, input.pos_w.xyz, input.normal, to_eye);
+    float4 light_color = calc_light(lights, active_light_counts, new_mat, input.pos_w.xyz, input.normal, to_eye, shadow_factor);
     float4 color = light_color;
 
     float3 ref = reflect(-to_eye, input.normal);
@@ -60,6 +63,5 @@ float4 PS_Main(VS_OUT input) : SV_Target
 
     color.w = diffuse_albedo.w;
 #endif
-
     return color;
 }

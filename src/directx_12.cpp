@@ -291,7 +291,42 @@ namespace fuse::directx {
                     _shadow_map.dsv_heap->GetCPUDescriptorHandleForHeapStart(),
                     D3D12_CLEAR_FLAG_DEPTH, 1.f, 0, 0, nullptr);
             auto dsv = _shadow_map.dsv_heap->GetCPUDescriptorHandleForHeapStart();
+            _cmd_list->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            _cmd_list->IASetVertexBuffers(0, 1,
+                                          &(_vertex_buffers[type_id<vertex>()].second));
+            _cmd_list->IASetIndexBuffer(
+                    &(_index_buffers[type_id<vertex>()].second));
             _cmd_list->OMSetRenderTargets(0, nullptr, false, &dsv);
+            Vector3 center = Vector3::Zero;
+            Vector3 light_vec = Vector3(0.f, -1.f, 1.f);
+            light_vec.Normalize();
+            camera light_cam;
+            light_cam.tr.position = center + (-light_vec * 2) * 10.f;
+            light_cam.tr.rotation.x = DirectX::XM_PI/4.f;
+            auto view = light_cam.view();
+            auto proj = DirectX::XMMatrixOrthographicLH(80.f, 80.f, 1.f, 100.f);
+            Matrix ndc_to_uv = {.5f, .0f, .0f, .0f,
+                                .0f, -.5f, .0f, .0f,
+                                .0f, .0f, 1.f, 0.f,
+                                .5f, .5f, .0f, 1.f};
+            _global.light_vp = view * proj;
+            _global.shadow_uv_matrix = _global.light_vp * ndc_to_uv;
+            update_const_buffer(_global_buffer, &_global, 0);
+            _cmd_list->SetPipelineState(
+                    _pso_list[static_cast<uint8_t>(layer::dynamic_shadow)].Get());
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque)]) {
+                render(e);
+            }
+
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::translucent)]) {
+                render(e);
+            }
+
+            auto b1 = CD3DX12_RESOURCE_BARRIER::Transition(
+                    _shadow_map.depth_map.Get(),
+                    D3D12_RESOURCE_STATE_DEPTH_WRITE,
+                    D3D12_RESOURCE_STATE_GENERIC_READ);
+            _cmd_list->ResourceBarrier(1, &b1);
         }
 
         _cmd_list->RSSetViewports(1, &_view_port);
@@ -687,7 +722,8 @@ namespace fuse::directx {
 
         auto sampler_arr = sampler::samplers();
 
-        auto rs_desc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param, 9,
+        auto rs_desc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param,
+                                                   sampler_arr.size(),
                                                    sampler_arr.data());
         rs_desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
@@ -748,7 +784,8 @@ namespace fuse::directx {
 
         auto sampler_arr = sampler::samplers();
 
-        auto rs_desc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param, 9,
+        auto rs_desc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param,
+                                                   sampler_arr.size(),
                                                    sampler_arr.data());
         rs_desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 

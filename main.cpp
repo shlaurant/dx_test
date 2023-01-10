@@ -73,6 +73,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         std::vector<std::shared_ptr<fuse::directx::renderee>> renderees = build_renderees();
         dx12.init_renderees(renderees);
         std::shared_ptr<fuse::directx::camera> camera = std::make_shared<fuse::directx::camera>();
+        camera->tr.rotation.x= DirectX::XM_PI/4.f;
         camera->tr.position.z = -2.f;
         camera->tr.position.y = 5.f;
         dx12.set_main_camera(camera);
@@ -150,7 +151,7 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         skull0->texture[0] = "white";
         skull0->material = "default";
         skull0->tr.scale = Vector3(.5f, .5f, .5f);
-        skull0->tr.position = Vector3(-5.f, 1.f, 3.f);
+        skull0->tr.position = Vector3(-5.f, 6.f, 3.f);
         renderees.emplace_back(skull0);
 
         auto skull1 = std::make_shared<fuse::directx::renderee>();
@@ -195,7 +196,7 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         cube0->geometry = "cube";
         cube0->texture[0] = "white";
         cube0->material = "glass";
-        cube0->tr.position = Vector3(3.f, 6.f, 3.f);
+        cube0->tr.position = Vector3(3.f, 20.f, 3.f);
         renderees.emplace_back(cube0);
 
         auto tree_billboard = std::make_shared<fuse::directx::renderee>();
@@ -290,7 +291,7 @@ fuse::directx::light_info create_light_info() {
         li.active_count = 2;
 
         li.lights[0].type = 0;
-        li.lights[0].color = DirectX::SimpleMath::Vector3(.8f, .8f, .8f);
+        li.lights[0].color = DirectX::SimpleMath::Vector3(1.f, 1.f, 1.f);
         li.lights[0].fo_start;
         li.lights[0].direction = Vector3(0.f, -1.f, 1.f);
         li.lights[0].direction.Normalize();

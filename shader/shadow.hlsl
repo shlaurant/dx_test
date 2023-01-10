@@ -19,7 +19,7 @@ struct VS_OUT
 VS_OUT VS(VS_IN input) {
     VS_OUT output;
 
-    float4x4 wvp = mul(w, vp);
+    float4x4 wvp = mul(w, light_vp);
     output.pos = mul(float4(input.pos, 1.f), wvp);
     output.uv = input.uv;
 

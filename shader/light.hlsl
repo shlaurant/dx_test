@@ -105,4 +105,18 @@ float4 calc_light(light lights[LIGHT_COUNT], int active_cnt, material mat, float
     return float4(ret, 1.0f);
 }
 
+float4 calc_light(light lights[LIGHT_COUNT], int active_cnt, material mat, float3 pos, float3 normal, float3 to_eye, float shadow_factor){
+    float3 ret;
+
+    for(int i = 0; i < active_cnt; ++i){
+        light l = lights[i];
+        if(l.type == 0) ret += shadow_factor * directional_light(l, mat, normal, to_eye);
+        if(l.type == 1) ret += point_light(l, mat, pos, normal, to_eye);
+        if(l.type == 2) ret += spot_light(l, mat, pos, normal, to_eye);
+        if(l.type == 3) ret += l.color * mat.diffuse_albedo.rgb;
+    }
+
+    return float4(ret, 1.0f);
+}
+
 #endif

@@ -49,10 +49,19 @@ namespace fuse::directx {
                                         D3D12_TEXTURE_ADDRESS_MODE_MIRROR,
                                         D3D12_TEXTURE_ADDRESS_MODE_MIRROR);
 
-    std::array<const CD3DX12_STATIC_SAMPLER_DESC, 9> sampler::samplers() {
+    const CD3DX12_STATIC_SAMPLER_DESC
+            sampler::SHADOW_PCF(9,
+                                D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT,
+                                D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+                                D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+                                D3D12_TEXTURE_ADDRESS_MODE_BORDER, 0.f, 16,
+                                D3D12_COMPARISON_FUNC_LESS_EQUAL,
+                                D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK);
+
+    std::array<const CD3DX12_STATIC_SAMPLER_DESC, 10> sampler::samplers() {
         return {POINT_WRAP, POINT_CLAMP, POINT_MIRROR, LINEAR_WRAP,
                 LINEAR_CLAMP, LINEAR_MIRROR, ANISOTROPIC_WRAP,
-                ANISOTROPIC_CLAMP, ANISOTROPIC_MIRROR};
+                ANISOTROPIC_CLAMP, ANISOTROPIC_MIRROR, SHADOW_PCF};
     }
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC
@@ -237,8 +246,9 @@ namespace fuse::directx {
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC
     pipeline_state::skybox_desc(D3D12_INPUT_ELEMENT_DESC *ed, UINT ed_cnt,
-                ID3D12RootSignature *rs, const std::vector<uint8_t> &vs,
-                const std::vector<uint8_t> &ps) {
+                                ID3D12RootSignature *rs,
+                                const std::vector<uint8_t> &vs,
+                                const std::vector<uint8_t> &ps) {
         auto ret = default_desc(ed, ed_cnt, rs, vs, ps);
         ret.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
         ret.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
@@ -246,14 +256,17 @@ namespace fuse::directx {
     }
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC
-    pipeline_state::dynamic_shadow_desc(D3D12_INPUT_ELEMENT_DESC *ed, UINT ed_cnt,
-                                ID3D12RootSignature *rs, const std::vector<uint8_t> &vs,
-                                const std::vector<uint8_t> &ps) {
+    pipeline_state::dynamic_shadow_desc(D3D12_INPUT_ELEMENT_DESC *ed,
+                                        UINT ed_cnt,
+                                        ID3D12RootSignature *rs,
+                                        const std::vector<uint8_t> &vs,
+                                        const std::vector<uint8_t> &ps) {
         auto ret = default_desc(ed, ed_cnt, rs, vs, ps);
         ret.RasterizerState.DepthBias = 100000;
         ret.RasterizerState.DepthBiasClamp = 0.f;
         ret.RasterizerState.SlopeScaledDepthBias = 1.f;
         ret.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+        ret.SampleDesc.Count = 1;
         ret.NumRenderTargets = 0;
         return ret;
     }

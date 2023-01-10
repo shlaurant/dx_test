@@ -6,6 +6,8 @@ cbuffer globals :register(b0) {
     int reflection_count;
     float3 pad0;
     row_major float4x4 shadow_matrix;
+    row_major float4x4 light_vp;
+    row_major float4x4 shadow_uv_matrix;
 };
 
 cbuffer camera :register(b1) {
@@ -39,5 +41,6 @@ SamplerState sam_lm : register(s5);
 SamplerState sam_aw : register(s6);
 SamplerState sam_ac : register(s7);
 SamplerState sam_am : register(s8);
+SamplerComparisonState sam_sh : register(s9);
 
 #endif

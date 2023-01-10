@@ -22,7 +22,9 @@ namespace fuse::directx {
         static const CD3DX12_STATIC_SAMPLER_DESC ANISOTROPIC_CLAMP;
         static const CD3DX12_STATIC_SAMPLER_DESC ANISOTROPIC_MIRROR;
 
-        static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 9> samplers();
+        static const CD3DX12_STATIC_SAMPLER_DESC SHADOW_PCF;
+
+        static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 10> samplers();
     };
 
     class pipeline_state {

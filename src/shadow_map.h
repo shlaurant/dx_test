@@ -12,6 +12,5 @@ namespace fuse::directx {
 
         ComPtr<ID3D12Resource> depth_map;
         ComPtr<ID3D12DescriptorHeap> dsv_heap;
-        ComPtr<ID3D12DescriptorHeap> srv_heap;
     };
 }

@@ -121,5 +121,7 @@ namespace fuse::directx {
         int reflection_count;
         DirectX::SimpleMath::Vector3 pad0;
         DirectX::SimpleMath::Matrix shadow_matrix;
+        DirectX::SimpleMath::Matrix light_vp;
+        DirectX::SimpleMath::Matrix shadow_uv_matrix;
     };
 }
