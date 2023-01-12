@@ -19,5 +19,6 @@
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
-#include "../windows/includes/DirectXTex.h"
+#include <DirectXTex.h>
+#include <fbxsdk.h>
 #include "SimpleMath.h"

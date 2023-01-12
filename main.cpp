@@ -6,10 +6,12 @@
 #include "helper.h"
 #include "Input.h"
 #include "GameTimer.h"
+#include "FBXLoader.h"
 
 using namespace DirectX::SimpleMath;
 
 Input input;
+FBXLoader fbx_loader;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -226,6 +228,16 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         sky->material = "";
         sky->tr.position = Vector3(0.f, 0.f, 0.f);
         renderees.emplace_back(sky);
+
+        auto body = std::make_shared<fuse::directx::renderee>();
+        body->name = "body";
+        body->type = fuse::directx::renderee_type::opaque;
+        body->geometry = "Bodymesh";
+        body->texture[0] = "white";
+        body->material = "rough";
+        body->tr.scale = Vector3(.1f, .1f, .1f);
+        body->tr.position = Vector3(6.f, 12.f, 0.f);
+        renderees.emplace_back(body);
     }
     return renderees;
 }
@@ -281,6 +293,12 @@ create_geometries() {
     auto terrain = create_terrain(20, 2);
     terrain.name = "terrain";
     ret.emplace_back(terrain);
+
+    fbx_loader.LoadFbx(L"resource\\male.fbx");
+    auto male = fbx_loader.geometries();
+    for(const auto &e:male){
+        ret.emplace_back(e);
+    }
 
     return std::move(ret);
 }

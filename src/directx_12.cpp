@@ -85,6 +85,9 @@ namespace fuse::directx {
                         tid = type_id<vertex>();
                         break;
                 }
+                if(_geo_infos[tid].count(ptr->geometry)< 1){
+                    tid = tid;
+                }
                 ptr->geo = _geo_infos[tid][ptr->geometry];
 
                 for (auto i = 0; i < _countof(ptr->texture); ++i) {

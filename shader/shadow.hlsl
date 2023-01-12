@@ -28,5 +28,5 @@ VS_OUT VS(VS_IN input) {
 
 void PS(VS_OUT input) {
     float4 diffuse = tex.Sample(sam_lw, input.uv) * materials[obj_pad0].diffuse_albedo;
-    clip(diffuse.w = .1f);
+    clip(diffuse.w - .1f);
 }

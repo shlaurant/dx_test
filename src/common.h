@@ -58,6 +58,9 @@ namespace fuse::directx {
         DirectX::SimpleMath::Vector3 position;
         DirectX::SimpleMath::Vector2 uv;
         DirectX::SimpleMath::Vector3 normal;
+        DirectX::SimpleMath::Vector3 tangent;
+        DirectX::SimpleMath::Vector4 weights;
+        DirectX::SimpleMath::Vector4 indices;
     };
 
     struct vertex_billboard {
