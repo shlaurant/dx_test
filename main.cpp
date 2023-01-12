@@ -232,12 +232,21 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         auto body = std::make_shared<fuse::directx::renderee>();
         body->name = "body";
         body->type = fuse::directx::renderee_type::opaque;
-        body->geometry = "Bodymesh";
+        body->geometry = "maleBodymesh";
         body->texture[0] = "white";
         body->material = "rough";
         body->tr.scale = Vector3(.1f, .1f, .1f);
         body->tr.position = Vector3(6.f, 12.f, 0.f);
         renderees.emplace_back(body);
+
+        auto house = std::make_shared<fuse::directx::renderee>();
+        house->name = "house";
+        house->type = fuse::directx::renderee_type::opaque;
+        house->geometry = "houseCube.009";
+        house->texture[0] = "white";
+        house->material = "rough";
+        house->tr.position = Vector3(0.f, 6.f, -5.f);
+        renderees.emplace_back(house);
     }
     return renderees;
 }
@@ -294,9 +303,13 @@ create_geometries() {
     terrain.name = "terrain";
     ret.emplace_back(terrain);
 
-    fbx_loader.LoadFbx(L"resource\\male.fbx");
-    auto male = fbx_loader.geometries();
-    for(const auto &e:male){
+    fbx_loader.LoadFbx(L"resource\\male.fbx", "male");
+    for(const auto &e: fbx_loader.geometries()){
+        ret.emplace_back(e);
+    }
+
+    fbx_loader.LoadFbx(L"resource\\house.fbx", "house");
+    for(const auto &e : fbx_loader.geometries()){
         ret.emplace_back(e);
     }
 

@@ -26,7 +26,7 @@ namespace fuse::directx {
     class directx_12 {
     public:
         const static int SWAP_CHAIN_BUFFER_COUNT = 2;
-        const static int OBJ_CNT = 10;
+        const static int OBJ_CNT = 20;
 
         void init(const window_info &);
 

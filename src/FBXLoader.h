@@ -79,7 +79,7 @@ public:
     ~FBXLoader();
 
 public:
-    void LoadFbx(const std::wstring &path);
+    void LoadFbx(const std::wstring &path, const std::string &name);
     std::vector<fuse::directx::geometry<fuse::directx::vertex>> geometries();
 
 public:
@@ -131,6 +131,8 @@ private:
     void FillBoneWeight(FbxMesh *mesh, FbxMeshInfo *meshInfo);
 
 private:
+    std::string _name;
+
     FbxManager *_manager = nullptr;
     FbxScene *_scene = nullptr;
     FbxImporter *_importer = nullptr;

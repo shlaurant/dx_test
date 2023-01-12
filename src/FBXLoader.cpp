@@ -21,8 +21,17 @@ FBXLoader::~FBXLoader()
 		_manager->Destroy();
 }
 
-void FBXLoader::LoadFbx(const wstring& path)
+void FBXLoader::LoadFbx(const wstring& path, const std::string &name)
 {
+    _name = name;
+    _manager = nullptr;
+    _importer = nullptr;
+    _resourceDirectory.clear();
+    _meshes.clear();
+    _bones.clear();
+    _animClips.clear();
+    _animNames.Clear();
+
 	Import(path);
 
 	// Animation	
@@ -39,7 +48,7 @@ std::vector<geometry<vertex>> FBXLoader::geometries() {
     std::vector<geometry<vertex>> ret;
     for(const auto &e : _meshes){
         geometry<vertex> geo;
-        geo.name = ws2s(e.name);
+        geo.name = _name + ws2s(e.name);
         geo.vertices = e.vertices;
         for(auto i : e.indices[0]) geo.indices.push_back(i);
         ret.emplace_back(geo);
