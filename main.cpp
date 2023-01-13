@@ -122,6 +122,8 @@ void load_textures(fuse::directx::directx_12 &dx12) {
     dx12.load_texture("marble_diffuse", L"resource\\marble_diffuse.jpg");
     dx12.load_texture("marble_normal", L"resource\\marble_normal.jpg");
     dx12.load_texture("default_normal", L"resource\\default_normal.png");
+    dx12.load_texture("dragon_diffuse", L"resource\\dragon_diffuse.jpg");
+    dx12.load_texture("dragon_normal", L"resource\\dragon_normal.jpg");
 }
 
 void load_materials(fuse::directx::directx_12 &dx12) {
@@ -253,7 +255,7 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         body->material = "rough";
         body->tr.scale = Vector3(.1f, .1f, .1f);
         body->tr.position = Vector3(6.f, 12.f, 0.f);
-        renderees.emplace_back(body);
+//        renderees.emplace_back(body);
 
         auto house = std::make_shared<fuse::directx::renderee>();
         house->name = "house";
@@ -263,6 +265,17 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         house->material = "rough";
         house->tr.position = Vector3(0.f, 6.f, -5.f);
 //        renderees.emplace_back(house);
+
+        auto dragon = std::make_shared<fuse::directx::renderee>();
+        dragon->name = "dragon";
+        dragon->type = fuse::directx::renderee_type::opaque;
+        dragon->geometry = "dragonDragon_Mesh";
+        dragon->texture[0] = "dragon_diffuse";
+        dragon->texture[1] = "dragon_normal";
+        dragon->material = "rough";
+        dragon->tr.position = Vector3(0.f, 6.f, -5.f);
+        dragon->tr.scale = Vector3(0.25f, 0.25f, 0.25f);
+        renderees.emplace_back(dragon);
     }
 
     return renderees;
@@ -320,12 +333,17 @@ create_geometries() {
     terrain.name = "terrain";
     ret.emplace_back(terrain);
 
-    fbx_loader.LoadFbx(L"resource\\male.fbx", "male");
-    for(const auto &e: fbx_loader.geometries()){
-        ret.emplace_back(e);
-    }
+//    fbx_loader.LoadFbx(L"resource\\male.fbx", "male");
+//    for(const auto &e: fbx_loader.geometries()){
+//        ret.emplace_back(e);
+//    }
+//
+//    fbx_loader.LoadFbx(L"resource\\house.fbx", "house");
+//    for(const auto &e : fbx_loader.geometries()){
+//        ret.emplace_back(e);
+//    }
 
-    fbx_loader.LoadFbx(L"resource\\house.fbx", "house");
+    fbx_loader.LoadFbx(L"resource\\Dragon.fbx", "dragon");
     for(const auto &e : fbx_loader.geometries()){
         ret.emplace_back(e);
     }
