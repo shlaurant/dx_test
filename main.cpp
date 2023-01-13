@@ -119,7 +119,11 @@ void load_textures(fuse::directx::directx_12 &dx12) {
     dx12.load_texture("house_roughness", L"resource\\house_roughness.png");
     dx12.load_texture("male_diffuse", L"resource\\male_diffuse.png");
     dx12.load_texture("male_normal", L"resource\\male_normal.png");
+    dx12.load_texture("marble_diffuse", L"resource\\marble_diffuse.jpg");
+    dx12.load_texture("marble_normal", L"resource\\marble_normal.jpg");
+    dx12.load_texture("default_normal", L"resource\\default_normal.png");
 }
+
 void load_materials(fuse::directx::directx_12 &dx12) {
     dx12.load_material({"default", "metal", "rough", "glass", "terrain"},
                    {{Vector4(.5f, .5f, .5f, 1.f),
@@ -155,7 +159,8 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         skull0->name = "skull0";
         skull0->type = fuse::directx::renderee_type::opaque;
         skull0->geometry = "skull";
-        skull0->texture[0] = "white";
+        skull0->texture[0] = "marble_diffuse";
+        skull0->texture[1] = "default_normal";
         skull0->material = "default";
         skull0->tr.scale = Vector3(.5f, .5f, .5f);
         skull0->tr.position = Vector3(-5.f, 6.f, 3.f);
@@ -165,7 +170,8 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         skull1->name = "skull1";
         skull1->type = fuse::directx::renderee_type::opaque;
         skull1->geometry = "skull";
-        skull1->texture[0] = "white";
+        skull1->texture[0] = "marble_diffuse";
+        skull1->texture[1] = "default_normal";
         skull1->material = "rough";
         skull1->tr.position = Vector3(-12.f, 1.f, 3.f);
         renderees.emplace_back(skull1);
@@ -174,7 +180,8 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         skull2->name = "skull2";
         skull2->type = fuse::directx::renderee_type::opaque;
         skull2->geometry = "skull";
-        skull2->texture[0] = "white";
+        skull2->texture[0] = "marble_diffuse";
+        skull2->texture[1] = "default_normal";
         skull2->material = "metal";
         skull2->tr.position = Vector3(-19.f, 1.f, 3.f);
         renderees.emplace_back(skull2);
@@ -183,7 +190,8 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         skull3->name = "skull3";
         skull3->type = fuse::directx::renderee_type::translucent;
         skull3->geometry = "skull";
-        skull3->texture[0] = "white";
+        skull3->texture[0] = "marble_diffuse";
+        skull3->texture[1] = "default_normal";
         skull3->material = "glass";
         skull3->tr.position = Vector3(-26.f, 1.f, 3.f);
         renderees.emplace_back(skull3);
@@ -201,8 +209,9 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         cube0->name = "cube0";
         cube0->type = fuse::directx::renderee_type::translucent;
         cube0->geometry = "cube";
-        cube0->texture[0] = "white";
-        cube0->material = "glass";
+        cube0->texture[0] = "marble_diffuse";
+        cube0->texture[1] = "marble_normal";
+        cube0->material = "default";
         cube0->tr.position = Vector3(3.f, 20.f, 3.f);
         renderees.emplace_back(cube0);
 
