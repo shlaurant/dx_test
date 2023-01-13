@@ -137,6 +137,7 @@ void load_materials(fuse::directx::directx_12 &dx12) {
                         {Vector4(.5f, .5f, .5f, 1.f),
                                 Vector3(0.001f, 0.001, 0.001f), .99f}});
 }
+
 void load_geometries(fuse::directx::directx_12 &dx12) {
     auto geo = create_geometries();
     std::vector<fuse::directx::geometry<fuse::directx::vertex_billboard>> geo1;
