@@ -1,5 +1,5 @@
-#ifndef _SHADOW_UTIL_
-#define _SHADOW_UTIL_
+#ifndef _UTIL_
+#define _UTIL_
 
 float calc_shadow_factor(float4 shadow_pos) {
     shadow_pos.xyz /= shadow_pos.w;
@@ -23,6 +23,15 @@ float calc_shadow_factor(float4 shadow_pos) {
     }
 
     return percent_lit / 9.f;
+}
+
+float3 calc_w_normal(float3 normal_uv, float3 normal_unit, float3 tangent){
+    float3 normal_tb = 2.f * normal_uv - 1.f;
+    float3 t = normalize(tangent - dot(tangent, normal_unit) * normal_unit);
+    float3 b = cross(normal_unit, t);
+    float3x3 tbn = float3x3(t, b, normal_unit);
+
+    return mul(normal_tb, tbn);
 }
 
 #endif

@@ -32,8 +32,8 @@ void FBXLoader::LoadFbx(const wstring &path, const std::string &name) {
     Import(path);
 
     // Animation
-    //LoadBones(_scene->GetRootNode());
-    //LoadAnimationInfo();
+    LoadBones(_scene->GetRootNode());
+    LoadAnimationInfo();
 
     ParseNode(_scene->GetRootNode());
 

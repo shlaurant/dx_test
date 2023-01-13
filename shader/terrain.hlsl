@@ -1,6 +1,6 @@
 #include "light.hlsl"
 #include "register.hlsl"
-#include "shadow_util.hlsl"
+#include "util.hlsl"
 
 #define DIST_MAX 50.f
 #define DIST_MIN 5.f

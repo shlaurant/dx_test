@@ -1,5 +1,7 @@
 #pragma once
 
+#include "debug.h"
+
 namespace fuse::directx {
     template<typename T>
     Microsoft::WRL::ComPtr<ID3D12Resource> create_const_buffer(int elem_cnt,
@@ -23,7 +25,8 @@ namespace fuse::directx {
     void update_upload_buffer(Microsoft::WRL::ComPtr<ID3D12Resource> buffer,
                               const T *data, int index, UINT64 elem_size) {
         BYTE *mapped_data;
-        buffer->Map(0, nullptr, reinterpret_cast<void **>(&mapped_data));
+        ThrowIfFailed(buffer->Map(0, nullptr,
+                                  reinterpret_cast<void **>(&mapped_data)));
         memcpy(&mapped_data[elem_size * index], data, sizeof(T));
         buffer->Unmap(0, nullptr);
         mapped_data = nullptr;

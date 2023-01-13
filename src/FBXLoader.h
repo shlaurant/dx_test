@@ -31,7 +31,6 @@ struct BoneWeight {
         else
             boneWeights.push_back(Pair(index, weight));
 
-        // ����ġ�� �ִ� 4��
         if (boneWeights.size() > 4)
             boneWeights.pop_back();
     }
@@ -50,7 +49,7 @@ struct FbxMeshInfo {
     std::vector<fuse::directx::vertex> vertices;
     std::vector<std::vector<uint32_t>> indices;
     std::vector<FbxMaterialInfo> materials;
-    std::vector<BoneWeight> boneWeights; // �� ����ġ
+    std::vector<BoneWeight> boneWeights;
     bool hasAnimation;
 };
 

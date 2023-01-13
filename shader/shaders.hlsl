@@ -1,14 +1,16 @@
 #include "light.hlsl"
 #include "register.hlsl"
-#include "shadow_util.hlsl"
+#include "util.hlsl"
 
 Texture2D tex : register(t2);
+Texture2D tex_n : register(t3);
 
 struct VS_IN
 {
     float3 pos : POSITION;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
+    float3 tangent : TANGENT;
 };
 
 struct VS_OUT
@@ -17,6 +19,7 @@ struct VS_OUT
     float4 pos_w : POSITION;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
+    float3 tangent : TANGENT;
 };
 
 VS_OUT VS_Main(VS_IN input)
@@ -36,6 +39,7 @@ VS_OUT VS_Main(VS_IN input)
     output.pos = mul(float4(input.pos, 1.0f), wvp);
     output.uv = input.uv;
     output.normal = mul(input.normal, (float3x3)world);
+    output.tangent = mul(input.tangent, (float3x3)world);
 
     return output;
 }
@@ -49,17 +53,24 @@ float4 PS_Main(VS_OUT input) : SV_Target
     float4 color = float4(0.f, 0.f, 0.f, 0.5f);
 #else
     input.normal = normalize(input.normal);
+    float4 normal_sample = tex_n.Sample(sam_lw, input.uv);
+    float3 normal = calc_w_normal((float3)normal_sample, input.normal, input.tangent);
+
+
     float4 shadow_pos = mul(input.pos_w, shadow_uv_matrix);
     float shadow_factor = calc_shadow_factor(shadow_pos);
 
+
     material new_mat = {diffuse_albedo, materials[obj_pad0].fresnel_r0, materials[obj_pad0].roughness};
     float3 to_eye = normalize(camera_pos - input.pos_w.xyz);
-    float4 light_color = calc_light(lights, active_light_counts, new_mat, input.pos_w.xyz, input.normal, to_eye, shadow_factor);
+    float4 light_color = calc_light(lights, active_light_counts, new_mat, input.pos_w.xyz, normal, to_eye, shadow_factor);
     float4 color = light_color;
 
-    float3 ref = reflect(-to_eye, input.normal);
+
+    float3 ref = reflect(-to_eye, normal);
     float4 cube_color = cube_map.Sample(sam_lw, ref);
-    color.rgb += (1.f-new_mat.roughness) * fresnel_shlick(new_mat.fresnel_r0, input.normal, ref) * cube_color.rgb;
+    color.rgb += (1.f-new_mat.roughness) * fresnel_shlick(new_mat.fresnel_r0, normal, ref) * cube_color.rgb;
+
 
     color.w = diffuse_albedo.w;
 #endif
