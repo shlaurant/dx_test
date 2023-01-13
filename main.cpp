@@ -114,6 +114,10 @@ void load_textures(fuse::directx::directx_12 &dx12) {
     dx12.load_texture("terrain_d", L"resource\\terrain_d.png");
     dx12.load_texture("terrain_h", L"resource\\terrain_h.png");
     dx12.load_texture("skybox", L"resource\\skybox.dds");
+    dx12.load_texture("house_diffuse", L"resource\\house_diffuse.png");
+    dx12.load_texture("house_normal", L"resource\\house_normal.png");
+    dx12.load_texture("house_roughness", L"resource\\house_roughness.png");
+    dx12.load_texture("male_diffuse", L"resource\\male_diffuse.png");
 }
 void load_materials(fuse::directx::directx_12 &dx12) {
     dx12.load_material({"default", "metal", "rough", "glass", "terrain"},
@@ -233,7 +237,7 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         body->name = "body";
         body->type = fuse::directx::renderee_type::opaque;
         body->geometry = "maleBodymesh";
-        body->texture[0] = "white";
+        body->texture[0] = "male_diffuse";
         body->material = "rough";
         body->tr.scale = Vector3(.1f, .1f, .1f);
         body->tr.position = Vector3(6.f, 12.f, 0.f);
@@ -243,11 +247,12 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         house->name = "house";
         house->type = fuse::directx::renderee_type::opaque;
         house->geometry = "houseCube.009";
-        house->texture[0] = "white";
+        house->texture[0] = "house_diffuse";
         house->material = "rough";
         house->tr.position = Vector3(0.f, 6.f, -5.f);
         renderees.emplace_back(house);
     }
+
     return renderees;
 }
 

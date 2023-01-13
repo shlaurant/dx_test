@@ -81,6 +81,7 @@ public:
 public:
     void LoadFbx(const std::wstring &path, const std::string &name);
     std::vector<fuse::directx::geometry<fuse::directx::vertex>> geometries();
+    std::vector<std::wstring> textures();
 
 public:
     int32_t GetMeshCount() { return static_cast<int32_t>(_meshes.size()); }
