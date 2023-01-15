@@ -1,4 +1,5 @@
 fxc "shaders.hlsl" /Od /Zi /T vs_5_1 /E "VS_Main" /Fo "vs.cso"
+fxc "shaders.hlsl" /D SKINNED /Od /Zi /T vs_5_1 /E "VS_Main" /Fo "vs_skin.cso"
 fxc "shaders.hlsl" /D REFLECTION /Od /Zi /T vs_5_1 /E "VS_Main" /Fo "vs_ref.cso"
 fxc "shaders.hlsl" /D SHADOW /Od /Zi /T vs_5_1 /E "VS_Main" /Fo "vs_sha.cso"
 

@@ -127,4 +127,12 @@ namespace fuse::directx {
         DirectX::SimpleMath::Matrix light_vp;
         DirectX::SimpleMath::Matrix shadow_uv_matrix;
     };
+
+    struct bone_frame_info {
+        
+    };
+
+    struct animation_frame {
+
+    };
 }

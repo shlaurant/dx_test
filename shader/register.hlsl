@@ -1,6 +1,8 @@
 #ifndef GUARD_REGISTER
 #define GUARD_REGISTER
 
+#define MAX_BONE_CNT 256
+
 cbuffer globals :register(b0) {
     row_major float4x4 reflection_matrix[10];
     int reflection_count;
@@ -27,6 +29,10 @@ cbuffer object_const :register(b3) {
     int obj_pad0;
     row_major float4x4 w;
 };
+
+cbuffer bone_matrix : register(b4) {
+    row_major float4x4 final_matrices[MAX_BONE_CNT];
+}
 
 TextureCube cube_map : register(t0);
 Texture2D shadow_map : register(t1);

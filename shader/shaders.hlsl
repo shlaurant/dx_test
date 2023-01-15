@@ -11,6 +11,8 @@ struct VS_IN
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
+    float4 weights : WEIGHTS;
+    float4 indices : INDICES;
 };
 
 struct VS_OUT
@@ -32,6 +34,24 @@ VS_OUT VS_Main(VS_IN input)
     float4x4 world = mul(w, shadow_matrix);
 #else
     float4x4 world = w;
+#endif
+
+#ifdef SKINNED
+    float3 pos_t = float3(0.f, 0.f, 0.f);
+    float3 normal_t = float3(0.f, 0.f, 0.f);
+    float3 tangent_t = float3(0.f, 0.f, 0.f);
+
+    [unroll]
+    for(int i = 0; i < 4; ++i){
+        pos_t += input.weights[i] * mul(float4(input.pos, 1.f) ,final_matrices[input.indices[i]]).xyz;
+        normal_t += input.weights[i] * mul(input.normal, (float3x3) final_matrices[input.indices[i]]);
+        tangent_t += input.weights[i] * mul(input.tangent, (float3x3) final_matrices[input.indices[i]]);
+    }
+
+    input.pos = pos_t;
+    input.normal = normal_t;
+    input.tangent = tangent_t;
+
 #endif
 
     output.pos_w = mul(float4(input.pos, 1.0f), world);
