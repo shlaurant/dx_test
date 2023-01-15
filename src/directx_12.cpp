@@ -85,7 +85,7 @@ namespace fuse::directx {
                         tid = type_id<vertex>();
                         break;
                 }
-                if(_geo_infos[tid].count(ptr->geometry)< 1){
+                if (_geo_infos[tid].count(ptr->geometry) < 1) {
                     tid = tid;
                 }
                 ptr->geo = _geo_infos[tid][ptr->geometry];
@@ -294,7 +294,8 @@ namespace fuse::directx {
                     _shadow_map.dsv_heap->GetCPUDescriptorHandleForHeapStart(),
                     D3D12_CLEAR_FLAG_DEPTH, 1.f, 0, 0, nullptr);
             auto dsv = _shadow_map.dsv_heap->GetCPUDescriptorHandleForHeapStart();
-            _cmd_list->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            _cmd_list->IASetPrimitiveTopology(
+                    D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             _cmd_list->IASetVertexBuffers(0, 1,
                                           &(_vertex_buffers[type_id<vertex>()].second));
             _cmd_list->IASetIndexBuffer(
@@ -305,7 +306,7 @@ namespace fuse::directx {
             light_vec.Normalize();
             camera light_cam;
             light_cam.tr.position = center + (-light_vec * 2) * 10.f;
-            light_cam.tr.rotation.x = DirectX::XM_PI/4.f;
+            light_cam.tr.rotation.x = DirectX::XM_PI / 4.f;
             auto view = light_cam.view();
             auto proj = DirectX::XMMatrixOrthographicLH(80.f, 80.f, 1.f, 100.f);
             Matrix ndc_to_uv = {.5f, .0f, .0f, .0f,
@@ -819,12 +820,12 @@ namespace fuse::directx {
         auto ps_sha_data = DX::ReadData(L"shader\\ps_sha.cso");
 
         D3D12_INPUT_ELEMENT_DESC ie_desc[] = {
-                {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-                {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-                {"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-                {"TANGENT",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-                {"WEIGHTS",   0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-                {"INDICES",   0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 60, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+                {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+                {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+                {"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+                {"TANGENT",  0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+                {"WEIGHTS",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+                {"INDICES",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 60, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
         };
 
         auto opaque_desc = pipeline_state::default_desc(ie_desc,
@@ -951,6 +952,15 @@ namespace fuse::directx {
                                                            IID_PPV_ARGS(
                                                                    &_pso_list[static_cast<uint8_t>(layer::dynamic_shadow)])));
 
+        auto vs_skin = DX::ReadData(L"shader\\vs_skin.cso");
+        auto skin_pso = pipeline_state::dynamic_shadow_desc(ie_desc,
+                                                            _countof(ie_desc),
+                                                            _signatures[shader_type::general].Get(),
+                                                            vs_skin,
+                                                            ps_data);
+        ThrowIfFailed(_device->CreateGraphicsPipelineState(&skin_pso,
+                                                           IID_PPV_ARGS(
+                                                                   &_pso_list[static_cast<uint8_t>(layer::skinned)])));
     }
 
     void directx_12::execute_cmd_list() {

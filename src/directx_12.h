@@ -114,6 +114,7 @@ namespace fuse::directx {
             terrain,
             skybox,
             dynamic_shadow,
+            skinned,
             end
         };
 
