@@ -241,7 +241,7 @@ namespace fuse::directx {
         auto handle_sz = _device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         handle.ptr += obj * group_size();
-        handle.ptr += handle_sz * (regi + 1);
+        handle.ptr += handle_sz * (regi + 2);
         auto texture_res = _textures[texture].second;
         auto desc = _textures[texture].first;
         _device->CreateShaderResourceView(texture_res.Get(), &desc, handle);
@@ -773,7 +773,7 @@ namespace fuse::directx {
         };
 
         CD3DX12_DESCRIPTOR_RANGE t1[] = {
-                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 3),
+                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 2, 3),
                 CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 2)
         };
 

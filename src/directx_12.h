@@ -153,7 +153,7 @@ namespace fuse::directx {
         std::unordered_map<shader_type, ComPtr<ID3D12RootSignature>> _signatures;
 
         //resource
-        static const int TABLE_SIZE = 3;
+        static const int TABLE_SIZE = 4;
 
         std::unordered_map<uint32_t, std::unordered_map<std::string, geo_info>> _geo_infos;
         std::unordered_map<uint32_t, std::pair<ComPtr<
