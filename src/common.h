@@ -128,11 +128,7 @@ namespace fuse::directx {
         DirectX::SimpleMath::Matrix shadow_uv_matrix;
     };
 
-    struct bone_frame_info {
-        
-    };
-
-    struct animation_frame {
-
+    struct skin_matrix {
+        DirectX::SimpleMath::Matrix matrices[256];
     };
 }

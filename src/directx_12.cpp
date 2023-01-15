@@ -668,6 +668,7 @@ namespace fuse::directx {
     void directx_12::init_resources() {
         _obj_const_buffer = create_const_buffer<object_constant>(OBJ_CNT,
                                                                  _device);
+        _skin_metrics_buf = create_const_buffer<skin_matrix>(OBJ_CNT, _device);
         _mat_buffer = create_upload_buffer(OBJ_CNT, sizeof(material), _device);
 
         D3D12_DESCRIPTOR_HEAP_DESC h_desc = {};
@@ -677,15 +678,25 @@ namespace fuse::directx {
         h_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         _device->CreateDescriptorHeap(&h_desc, IID_PPV_ARGS(&_res_desc_heap));
 
-        auto w_addr = _obj_const_buffer->GetGPUVirtualAddress();
-
         for (auto i = 0; i < OBJ_CNT; ++i) {
             D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
             cbv_desc.SizeInBytes = size_of_256<object_constant>();
             cbv_desc.BufferLocation =
-                    w_addr + size_of_256<object_constant>() * i;
+                    _obj_const_buffer->GetGPUVirtualAddress() + size_of_256<object_constant>() * i;
             auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
             handle.ptr += group_size() * i;
+            _device->CreateConstantBufferView(&cbv_desc, handle);
+        }
+
+        for (auto i = 0; i < OBJ_CNT; ++i) {
+            D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
+            cbv_desc.SizeInBytes = size_of_256<skin_matrix>();
+            cbv_desc.BufferLocation =
+                    _skin_metrics_buf->GetGPUVirtualAddress() + size_of_256<skin_matrix>() * i;
+            auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
+            handle.ptr += group_size() * i +
+                          _device->GetDescriptorHandleIncrementSize(
+                                  D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
             _device->CreateConstantBufferView(&cbv_desc, handle);
         }
     }

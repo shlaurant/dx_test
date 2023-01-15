@@ -166,6 +166,7 @@ namespace fuse::directx {
         ComPtr<ID3D12Resource> _vp_buffer;
         ComPtr<ID3D12Resource> _light_buffer;
         ComPtr<ID3D12Resource> _obj_const_buffer;
+        ComPtr<ID3D12Resource> _skin_metrics_buf;
         ComPtr<ID3D12Resource> _mat_buffer;
         std::unordered_map<std::string, int> _mat_ids;
         std::unordered_map<std::string, std::pair<D3D12_SHADER_RESOURCE_VIEW_DESC,
@@ -173,6 +174,7 @@ namespace fuse::directx {
         ComPtr<ID3D12DescriptorHeap> _res_desc_heap;
         ComPtr<ID3D12Resource> _env_map_buffer;
         ComPtr<ID3D12DescriptorHeap> _env_desc_heap;
+
 
         //shader
         std::vector<ComPtr<ID3D12PipelineState>> _pso_list;

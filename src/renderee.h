@@ -2,7 +2,7 @@
 
 namespace fuse::directx {
     enum class renderee_type : uint8_t {
-        opaque, translucent, billboard, terrain, skybox, count
+        opaque, translucent, billboard, terrain, skybox, opaque_skinned, count
     };
 
     enum renderee_option {
@@ -22,6 +22,8 @@ namespace fuse::directx {
         std::string texture[2] = {"", ""};
         std::string material;
         transform tr;
+        std::vector<DirectX::SimpleMath::Matrix> skinning_matrices;
+
     private:
         int id;
         geo_info geo;
