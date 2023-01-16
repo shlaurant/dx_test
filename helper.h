@@ -1,5 +1,6 @@
 #pragma once
 
+#include <FBXLoader.h>
 #include "Input.h"
 #include "src/common.h"
 #include "GameTimer.h"
@@ -31,6 +32,37 @@ struct camera {
     DirectX::SimpleMath::Vector3 look_vector() const;
     DirectX::SimpleMath::Vector3 right_vector() const;
 };
+
+class animator {
+public:
+    void init(const FbxAnimClipInfo &anim,
+              const std::vector<std::shared_ptr<FbxBoneInfo>> &bones);
+    void reset();
+    std::vector<DirectX::SimpleMath::Matrix>
+    final_matrices_after(float delta); // linear interpolation
+
+private:
+    struct srt {
+        DirectX::SimpleMath::Vector3 scale = DirectX::SimpleMath::Vector3::One;
+        DirectX::SimpleMath::Vector4 rotation = DirectX::SimpleMath::Vector4::Zero;
+        DirectX::SimpleMath::Vector3 translation = DirectX::SimpleMath::Vector3::Zero;
+
+        DirectX::SimpleMath::Matrix root_matrix();
+    };
+
+    double _start;
+    double _end;
+    double _time;
+    int _frame;
+    std::vector<double> _frame_times;
+    std::vector<DirectX::SimpleMath::Matrix> _offsets;
+    std::vector<std::vector<srt>> _bone_srts;//bone - frame
+
+    inline size_t bone_cnt() {return _offsets.size();}
+    inline size_t frame_cnt() {return _frame_times.size();}
+};
+
+DirectX::SimpleMath::Matrix conv_mat(const FbxMatrix &);
 
 DirectX::SimpleMath::Vector3 look_vector(std::shared_ptr<fuse::directx::camera> &);
 DirectX::SimpleMath::Vector3 right_vector(std::shared_ptr<fuse::directx::camera> &);

@@ -4,6 +4,101 @@
 
 using namespace DirectX::SimpleMath;
 
+void animator::init(const FbxAnimClipInfo &anim,
+                    const std::vector<std::shared_ptr<FbxBoneInfo>> &bones) {
+    _start = anim.startTime.GetSecondDouble();
+    _end = anim.endTime.GetSecondDouble();
+    _time = 0;
+    _frame = 0;
+
+    _frame_times.clear();
+    for (const auto &e: anim.keyFrames[0]) {
+        _frame_times.push_back(e.time);
+    }
+
+    _offsets.resize(bones.size());
+    for (auto i = 0; i < bones.size(); ++i) {
+        _offsets[i] = conv_mat(bones[i]->matOffset);
+    }
+
+    _bone_srts.resize(anim.keyFrames.size());
+    for (auto &e: _bone_srts) {
+        e.clear();
+        e.resize(frame_cnt());
+    }
+
+    for (auto frame = 0; frame < frame_cnt(); ++frame) {
+        for (auto bone = 0; bone < bone_cnt(); ++bone){
+            auto &fv = anim.keyFrames[bone];
+            if(fv.size() <= frame){
+                //do nothing
+            } else {
+                _bone_srts[bone][frame].scale.x = static_cast<float>(fv[frame].matTransform.GetS()[0]);
+                _bone_srts[bone][frame].scale.y = static_cast<float>(fv[frame].matTransform.GetS()[1]);
+                _bone_srts[bone][frame].scale.z = static_cast<float>(fv[frame].matTransform.GetS()[2]);
+
+                _bone_srts[bone][frame].rotation.x = static_cast<float>(fv[frame].matTransform.GetQ()[0]);
+                _bone_srts[bone][frame].rotation.y = static_cast<float>(fv[frame].matTransform.GetQ()[1]);
+                _bone_srts[bone][frame].rotation.z = static_cast<float>(fv[frame].matTransform.GetQ()[2]);
+                _bone_srts[bone][frame].rotation.w = static_cast<float>(fv[frame].matTransform.GetQ()[3]);
+
+                _bone_srts[bone][frame].translation.x = static_cast<float>(fv[frame].matTransform.GetT()[0]);
+                _bone_srts[bone][frame].translation.y = static_cast<float>(fv[frame].matTransform.GetT()[1]);
+                _bone_srts[bone][frame].translation.z = static_cast<float>(fv[frame].matTransform.GetT()[2]);
+            }
+        }
+    }
+}
+
+void animator::reset() {
+    _frame = 0;
+    _time = _start;
+}
+
+DirectX::SimpleMath::Matrix animator::srt::root_matrix() {
+    return Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rotation) *
+           Matrix::CreateTranslation(translation);
+}
+
+std::vector<DirectX::SimpleMath::Matrix>
+animator::final_matrices_after(float delta) {
+    std::vector<DirectX::SimpleMath::Matrix> ret;
+    ret.resize(bone_cnt());
+
+    _time += delta;
+    if (_time > _end) {
+        reset();
+    }
+
+    if (_time > _frame_times[_frame + 1]) {
+        ++_frame;
+    }
+
+    if (_frame == frame_cnt() - 1) {
+        for (auto i = 0; i < bone_cnt(); ++i) {
+            ret[i] = _offsets[i] * _bone_srts[i][_frame].root_matrix();
+        }
+    } else {
+        for (auto i = 0; i < bone_cnt(); ++i) {
+            auto t = (_time - _frame_times[_frame]) /
+                     (_frame_times[_frame + 1] - _frame_times[_frame]);
+            srt lerp_srt;
+            lerp_srt.scale =
+                    Vector3::Lerp(_bone_srts[i][_frame].scale,
+                                  _bone_srts[i][_frame].scale, t);
+            lerp_srt.rotation =
+                    Vector4::Lerp(_bone_srts[i][_frame].rotation,
+                                  _bone_srts[i][_frame].rotation, t);
+            lerp_srt.translation = Vector3::Lerp(
+                    _bone_srts[i][_frame].translation,
+                    _bone_srts[i][_frame].translation, t);
+            ret[i] = _offsets[i] * lerp_srt.root_matrix();
+        }
+    }
+
+    return ret;
+}
+
 Matrix transform::translation_matrix() const {
     return Matrix::CreateTranslation(position);
 }
@@ -30,7 +125,8 @@ DirectX::SimpleMath::Matrix camera::projection() const {
                                              far_plane);
 }
 
-void handle_input(Input &input, std::shared_ptr<fuse::directx::camera> &camera, const GameTimer &timer) {
+void handle_input(Input &input, std::shared_ptr<fuse::directx::camera> &camera,
+                  const GameTimer &timer) {
     const float speed_c = 20.f;
     const float rot_c = .2f;
 
@@ -39,23 +135,29 @@ void handle_input(Input &input, std::shared_ptr<fuse::directx::camera> &camera, 
     dy = input.mouse_delta().second;
     camera->tr.rotation.y += (float) dx * rot_c * timer.DeltaTime();
     camera->tr.rotation.x += (float) dy * rot_c * timer.DeltaTime();
-    camera->tr.rotation.x = std::clamp(camera->tr.rotation.x, -DirectX::XM_PI/2.f, DirectX::XM_PI/2.f);
+    camera->tr.rotation.x = std::clamp(camera->tr.rotation.x,
+                                       -DirectX::XM_PI / 2.f,
+                                       DirectX::XM_PI / 2.f);
 
 
     if (input.GetButton(KEY_TYPE::W)) {
-        camera->tr.position += look_vector(camera) * speed_c * timer.DeltaTime();
+        camera->tr.position +=
+                look_vector(camera) * speed_c * timer.DeltaTime();
     }
 
     if (input.GetButton(KEY_TYPE::S)) {
-        camera->tr.position -= look_vector(camera) * speed_c * timer.DeltaTime();
+        camera->tr.position -=
+                look_vector(camera) * speed_c * timer.DeltaTime();
     }
 
     if (input.GetButton(KEY_TYPE::A)) {
-        camera->tr.position -= right_vector(camera) * speed_c * timer.DeltaTime();
+        camera->tr.position -=
+                right_vector(camera) * speed_c * timer.DeltaTime();
     }
 
     if (input.GetButton(KEY_TYPE::D)) {
-        camera->tr.position += right_vector(camera) * speed_c * timer.DeltaTime();
+        camera->tr.position +=
+                right_vector(camera) * speed_c * timer.DeltaTime();
     }
 
     if (input.GetButtonDown(KEY_TYPE::Q)) {
@@ -409,7 +511,7 @@ create_terrain(int half, int unit_sz) {
             ret.indices.push_back(point_index + line_cnt);
         }
     }
-    
+
     return ret;
 }
 
