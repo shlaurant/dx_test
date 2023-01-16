@@ -7,9 +7,9 @@ using namespace DirectX::SimpleMath;
 DirectX::SimpleMath::Matrix conv_mat(const FbxMatrix &m) {
     DirectX::SimpleMath::Matrix ret;
 
-    for(auto y =0; y < 4; ++y){
-        for(auto x = 0; x < 4; ++x){
-            ret.m[y][x] = static_cast<float>(m.Get(y,x));
+    for (auto y = 0; y < 4; ++y) {
+        for (auto x = 0; x < 4; ++x) {
+            ret.m[y][x] = static_cast<float>(m.Get(y, x));
         }
     }
 
@@ -40,9 +40,9 @@ void animator::init(const std::shared_ptr<FbxAnimClipInfo> &anim,
     }
 
     for (auto frame = 0; frame < frame_cnt(); ++frame) {
-        for (auto bone = 0; bone < bone_cnt(); ++bone){
+        for (auto bone = 0; bone < bone_cnt(); ++bone) {
             auto &fv = anim->keyFrames[bone];
-            if(fv.size() <= frame){
+            if (fv.size() <= frame) {
                 //do nothing
             } else {
                 _bone_srts[bone][frame].scale.x = static_cast<float>(fv[frame].matTransform.GetS()[0]);
@@ -72,43 +72,46 @@ DirectX::SimpleMath::Matrix animator::srt::root_matrix() {
            Matrix::CreateTranslation(translation);
 }
 
-std::vector<DirectX::SimpleMath::Matrix>
-animator::final_matrices_after(float delta) {
+void
+animator::final_matrices_after(float delta, fuse::directx::skin_matrix &out) {
     std::vector<DirectX::SimpleMath::Matrix> ret;
-    ret.resize(bone_cnt());
-
-    _time += delta;
-    if (_time > _end) {
-        reset();
+    ret.resize(bone_cnt(), Matrix::Identity);
+//
+//    _time += delta;
+//    if (_time > _end) {
+//        reset();
+//    }
+//
+//    if (frame_cnt() > _frame + 1 && _time > _frame_times[_frame + 1]) {
+//        ++_frame;
+//    }
+//
+//    if (_frame == frame_cnt() - 1) {
+//        for (auto i = 0; i < bone_cnt(); ++i) {
+//            ret[i] = _offsets[i] * _bone_srts[i][_frame].root_matrix();
+//        }
+//    } else {
+//        for (auto i = 0; i < bone_cnt(); ++i) {
+//            auto t = (_time - _frame_times[_frame]) /
+//                     (_frame_times[_frame + 1] - _frame_times[_frame]);
+//            srt lerp_srt;
+//            lerp_srt.scale =
+//                    Vector3::Lerp(_bone_srts[i][_frame].scale,
+//                                  _bone_srts[i][_frame].scale, t);
+//            lerp_srt.rotation =
+//                    Vector4::Lerp(_bone_srts[i][_frame].rotation,
+//                                  _bone_srts[i][_frame].rotation, t);
+//            lerp_srt.translation = Vector3::Lerp(
+//                    _bone_srts[i][_frame].translation,
+//                    _bone_srts[i][_frame].translation, t);
+//            ret[i] = _offsets[i] * lerp_srt.root_matrix();
+//        }
+//    }
+//
+    for (auto i = 0; i < min(sizeof(out.matrices) / sizeof(out.matrices[0]),
+                             ret.size()); ++i) {
+        out.matrices[i] = ret[i];
     }
-
-    if (_time > _frame_times[_frame + 1]) {
-        ++_frame;
-    }
-
-    if (_frame == frame_cnt() - 1) {
-        for (auto i = 0; i < bone_cnt(); ++i) {
-            ret[i] = _offsets[i] * _bone_srts[i][_frame].root_matrix();
-        }
-    } else {
-        for (auto i = 0; i < bone_cnt(); ++i) {
-            auto t = (_time - _frame_times[_frame]) /
-                     (_frame_times[_frame + 1] - _frame_times[_frame]);
-            srt lerp_srt;
-            lerp_srt.scale =
-                    Vector3::Lerp(_bone_srts[i][_frame].scale,
-                                  _bone_srts[i][_frame].scale, t);
-            lerp_srt.rotation =
-                    Vector4::Lerp(_bone_srts[i][_frame].rotation,
-                                  _bone_srts[i][_frame].rotation, t);
-            lerp_srt.translation = Vector3::Lerp(
-                    _bone_srts[i][_frame].translation,
-                    _bone_srts[i][_frame].translation, t);
-            ret[i] = _offsets[i] * lerp_srt.root_matrix();
-        }
-    }
-
-    return ret;
 }
 
 Matrix transform::translation_matrix() const {

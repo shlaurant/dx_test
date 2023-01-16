@@ -84,6 +84,9 @@ namespace fuse::directx {
                     case renderee_type::skybox:
                         tid = type_id<vertex>();
                         break;
+                    case renderee_type::opaque_skinned:
+                        tid = type_id<vertex>();
+                        break;
                 }
                 if (_geo_infos[tid].count(ptr->geometry) < 1) {
                     tid = tid;
@@ -101,6 +104,10 @@ namespace fuse::directx {
 
                 update_const_buffer(_obj_const_buffer, &(ptr->constants),
                                     ptr->id);
+
+                if (ptr->type == renderee_type::opaque_skinned)
+                    update_const_buffer(_skin_metrics_buf,
+                                        &(ptr->skin_matrices), ptr->id);
             }
         }
     }
@@ -145,6 +152,13 @@ namespace fuse::directx {
                 _pso_list[static_cast<uint8_t>(layer::opaque)].Get());
 
         for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque)]) {
+            render(e);
+        }
+
+        _cmd_list->SetPipelineState(
+                _pso_list[static_cast<uint8_t>(layer::skinned)].Get());
+
+        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
             render(e);
         }
 
@@ -319,6 +333,10 @@ namespace fuse::directx {
             _cmd_list->SetPipelineState(
                     _pso_list[static_cast<uint8_t>(layer::dynamic_shadow)].Get());
             for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque)]) {
+                render(e);
+            }
+
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
                 render(e);
             }
 
@@ -682,7 +700,8 @@ namespace fuse::directx {
             D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
             cbv_desc.SizeInBytes = size_of_256<object_constant>();
             cbv_desc.BufferLocation =
-                    _obj_const_buffer->GetGPUVirtualAddress() + size_of_256<object_constant>() * i;
+                    _obj_const_buffer->GetGPUVirtualAddress() +
+                    size_of_256<object_constant>() * i;
             auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
             handle.ptr += group_size() * i;
             _device->CreateConstantBufferView(&cbv_desc, handle);
@@ -692,7 +711,8 @@ namespace fuse::directx {
             D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
             cbv_desc.SizeInBytes = size_of_256<skin_matrix>();
             cbv_desc.BufferLocation =
-                    _skin_metrics_buf->GetGPUVirtualAddress() + size_of_256<skin_matrix>() * i;
+                    _skin_metrics_buf->GetGPUVirtualAddress() +
+                    size_of_256<skin_matrix>() * i;
             auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
             handle.ptr += group_size() * i +
                           _device->GetDescriptorHandleIncrementSize(
@@ -964,11 +984,11 @@ namespace fuse::directx {
                                                                    &_pso_list[static_cast<uint8_t>(layer::dynamic_shadow)])));
 
         auto vs_skin = DX::ReadData(L"shader\\vs_skin.cso");
-        auto skin_pso = pipeline_state::dynamic_shadow_desc(ie_desc,
-                                                            _countof(ie_desc),
-                                                            _signatures[shader_type::general].Get(),
-                                                            vs_skin,
-                                                            ps_data);
+        auto skin_pso = pipeline_state::default_desc(ie_desc,
+                                                     _countof(ie_desc),
+                                                     _signatures[shader_type::general].Get(),
+                                                     vs_skin,
+                                                     ps_data);
         ThrowIfFailed(_device->CreateGraphicsPipelineState(&skin_pso,
                                                            IID_PPV_ARGS(
                                                                    &_pso_list[static_cast<uint8_t>(layer::skinned)])));

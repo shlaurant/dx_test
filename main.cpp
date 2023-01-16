@@ -73,12 +73,13 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         load_geometries(dx12);
         load_textures(dx12);
         load_materials(dx12);
+        std::vector<std::shared_ptr<fuse::directx::renderee>> renderees = build_renderees();
         animator anim;
         anim.init(dragon_fbx.GetAnimClip()[0], dragon_fbx.GetBones());
-        std::vector<std::shared_ptr<fuse::directx::renderee>> renderees = build_renderees();
+        anim.final_matrices_after(0.f, renderees.back()->skin_matrices);
         dx12.init_renderees(renderees);
         std::shared_ptr<fuse::directx::camera> camera = std::make_shared<fuse::directx::camera>();
-        camera->tr.rotation.x= DirectX::XM_PI/4.f;
+        camera->tr.rotation.x = DirectX::XM_PI / 4.f;
         camera->tr.position.z = -2.f;
         camera->tr.position.y = 5.f;
         dx12.set_main_camera(camera);
@@ -95,6 +96,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                 SetWindowText(hwnd, txt.c_str());
                 timer.Tick();
                 input.Update();
+                anim.final_matrices_after(timer.DeltaTime(), renderees.back()->skin_matrices);
                 handle_input(input, camera, timer);
                 dx12.update_lights(li);
                 dx12.render_begin();
@@ -131,14 +133,14 @@ void load_textures(fuse::directx::directx_12 &dx12) {
 
 void load_materials(fuse::directx::directx_12 &dx12) {
     dx12.load_material({"default", "metal", "rough", "glass", "terrain"},
-                   {{Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.5f, 0.5f, 0.5f), .5f},
+                       {{Vector4(.5f, .5f, .5f, 1.f),
+                                Vector3(0.5f, 0.5f, 0.5f),      .5f},
                         {Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.9f, 0.9f, 0.9f), .1f},
+                                Vector3(0.9f, 0.9f, 0.9f),      .1f},
                         {Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.1f, 0.1f, 0.1f), .9f},
+                                Vector3(0.1f, 0.1f, 0.1f),      .9f},
                         {Vector4(.5f, .5f, .5f, .5f),
-                                Vector3(0.5f, 0.5f, 0.5f), .1f},
+                                Vector3(0.5f, 0.5f, 0.5f),      .1f},
                         {Vector4(.5f, .5f, .5f, 1.f),
                                 Vector3(0.001f, 0.001, 0.001f), .99f}});
 }
@@ -150,7 +152,9 @@ void load_geometries(fuse::directx::directx_12 &dx12) {
     fuse::directx::vertex_billboard v{Vector3(0.0f, 0.0f, 0.f),
                                       Vector2(1.f, 1.f)};
     geo1[0].name = "billboard";
-    geo1[0].vertices = {{Vector3(0.0f, 0.0f, 0.f), Vector2(1.f, 1.f)}, {Vector3(1.0f, 0.0f, 0.f), Vector2(1.5f, 1.5f)},{Vector3(2.0f, 0.0f, 0.f), Vector2(1.f, 1.f)}};
+    geo1[0].vertices = {{Vector3(0.0f, 0.0f, 0.f), Vector2(1.f, 1.f)},
+                        {Vector3(1.0f, 0.0f, 0.f), Vector2(1.5f, 1.5f)},
+                        {Vector3(2.0f, 0.0f, 0.f), Vector2(1.f, 1.f)}};
     geo1[0].indices.emplace_back(0);
     geo1[0].indices.emplace_back(1);
     geo1[0].indices.emplace_back(2);
@@ -271,7 +275,7 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
 
         auto dragon = std::make_shared<fuse::directx::renderee>();
         dragon->name = "dragon";
-        dragon->type = fuse::directx::renderee_type::opaque;
+        dragon->type = fuse::directx::renderee_type::opaque_skinned;
         dragon->geometry = "dragonDragon_Mesh";
         dragon->texture[0] = "dragon_diffuse";
         dragon->texture[1] = "dragon_normal";
@@ -346,7 +350,7 @@ create_geometries() {
 //        ret.emplace_back(e);
 //    }
 
-    for(const auto &e : dragon_fbx.geometries()){
+    for (const auto &e: dragon_fbx.geometries()) {
         ret.emplace_back(e);
     }
 

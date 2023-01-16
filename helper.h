@@ -38,8 +38,8 @@ public:
     void init(const std::shared_ptr<FbxAnimClipInfo> &anim,
               const std::vector<std::shared_ptr<FbxBoneInfo>> &bones);
     void reset();
-    std::vector<DirectX::SimpleMath::Matrix>
-    final_matrices_after(float delta); // linear interpolation
+    void
+    final_matrices_after(float delta, fuse::directx::skin_matrix &out); // linear interpolation
 
 private:
     struct srt {
