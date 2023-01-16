@@ -4,15 +4,27 @@
 
 using namespace DirectX::SimpleMath;
 
-void animator::init(const FbxAnimClipInfo &anim,
+DirectX::SimpleMath::Matrix conv_mat(const FbxMatrix &m) {
+    DirectX::SimpleMath::Matrix ret;
+
+    for(auto y =0; y < 4; ++y){
+        for(auto x = 0; x < 4; ++x){
+            ret.m[y][x] = static_cast<float>(m.Get(y,x));
+        }
+    }
+
+    return ret;
+}
+
+void animator::init(const std::shared_ptr<FbxAnimClipInfo> &anim,
                     const std::vector<std::shared_ptr<FbxBoneInfo>> &bones) {
-    _start = anim.startTime.GetSecondDouble();
-    _end = anim.endTime.GetSecondDouble();
+    _start = anim->startTime.GetSecondDouble();
+    _end = anim->endTime.GetSecondDouble();
     _time = 0;
     _frame = 0;
 
     _frame_times.clear();
-    for (const auto &e: anim.keyFrames[0]) {
+    for (const auto &e: anim->keyFrames[0]) {
         _frame_times.push_back(e.time);
     }
 
@@ -21,7 +33,7 @@ void animator::init(const FbxAnimClipInfo &anim,
         _offsets[i] = conv_mat(bones[i]->matOffset);
     }
 
-    _bone_srts.resize(anim.keyFrames.size());
+    _bone_srts.resize(anim->keyFrames.size());
     for (auto &e: _bone_srts) {
         e.clear();
         e.resize(frame_cnt());
@@ -29,7 +41,7 @@ void animator::init(const FbxAnimClipInfo &anim,
 
     for (auto frame = 0; frame < frame_cnt(); ++frame) {
         for (auto bone = 0; bone < bone_cnt(); ++bone){
-            auto &fv = anim.keyFrames[bone];
+            auto &fv = anim->keyFrames[bone];
             if(fv.size() <= frame){
                 //do nothing
             } else {

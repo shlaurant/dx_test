@@ -11,7 +11,7 @@
 using namespace DirectX::SimpleMath;
 
 Input input;
-FBXLoader fbx_loader;
+FBXLoader dragon_fbx;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -69,9 +69,12 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
 
         dx12.init({hwnd, 1920, 1080, true});
         auto li = create_light_info();
+        dragon_fbx.LoadFbx(L"resource\\Dragon.fbx", "dragon");
         load_geometries(dx12);
         load_textures(dx12);
         load_materials(dx12);
+        animator anim;
+        anim.init(dragon_fbx.GetAnimClip()[0], dragon_fbx.GetBones());
         std::vector<std::shared_ptr<fuse::directx::renderee>> renderees = build_renderees();
         dx12.init_renderees(renderees);
         std::shared_ptr<fuse::directx::camera> camera = std::make_shared<fuse::directx::camera>();
@@ -343,8 +346,7 @@ create_geometries() {
 //        ret.emplace_back(e);
 //    }
 
-    fbx_loader.LoadFbx(L"resource\\Dragon.fbx", "dragon");
-    for(const auto &e : fbx_loader.geometries()){
+    for(const auto &e : dragon_fbx.geometries()){
         ret.emplace_back(e);
     }
 

@@ -35,7 +35,7 @@ struct camera {
 
 class animator {
 public:
-    void init(const FbxAnimClipInfo &anim,
+    void init(const std::shared_ptr<FbxAnimClipInfo> &anim,
               const std::vector<std::shared_ptr<FbxBoneInfo>> &bones);
     void reset();
     std::vector<DirectX::SimpleMath::Matrix>
