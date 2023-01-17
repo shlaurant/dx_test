@@ -90,11 +90,11 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             } else {
+                timer.Tick();
                 std::wstring txt = L"fps: ";
                 txt += std::to_wstring(1 / timer.DeltaTime());
 
                 SetWindowText(hwnd, txt.c_str());
-                timer.Tick();
                 input.Update();
                 anim.final_matrices_after(timer.DeltaTime(), renderees.back()->skin_matrices);
                 handle_input(input, camera, timer);

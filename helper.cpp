@@ -1,6 +1,7 @@
 #include <SimpleMath.h>
 #include <string>
 #include "helper.h"
+#include "DirectXMath.h"
 
 using namespace DirectX::SimpleMath;
 
@@ -22,6 +23,7 @@ void animator::init(const std::shared_ptr<FbxAnimClipInfo> &anim,
     _end = anim->endTime.GetSecondDouble();
     _time = 0;
     _frame = 0;
+    _anim = anim;
 
     _frame_times.clear();
     for (const auto &e: anim->keyFrames[0]) {
@@ -30,7 +32,12 @@ void animator::init(const std::shared_ptr<FbxAnimClipInfo> &anim,
 
     _offsets.resize(bones.size());
     for (auto i = 0; i < bones.size(); ++i) {
-        _offsets[i] = conv_mat(bones[i]->matOffset);
+        _offsets[i] = conv_mat(bones[i]->matOffset.Inverse());
+    }
+
+    _bone_parents.resize(bones.size());
+    for (auto i = 0; i < bones.size(); ++i) {
+        _bone_parents[i] = bones[i]->parentIndex;
     }
 
     _bone_srts.resize(anim->keyFrames.size());
@@ -67,28 +74,29 @@ void animator::reset() {
     _time = _start;
 }
 
-DirectX::SimpleMath::Matrix animator::srt::root_matrix() {
-    return Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rotation) *
-           Matrix::CreateTranslation(translation);
+DirectX::SimpleMath::Matrix animator::srt::affine_matrix() const {
+    auto zero = Vector4(0.f, 0.f, 0.f, 1.f);
+    return DirectX::XMMatrixAffineTransformation(scale, zero, rotation,
+                                                 translation);
 }
 
 void
 animator::final_matrices_after(float delta, fuse::directx::skin_matrix &out) {
     std::vector<DirectX::SimpleMath::Matrix> ret;
     ret.resize(bone_cnt(), Matrix::Identity);
-//
-//    _time += delta;
-//    if (_time > _end) {
-//        reset();
-//    }
-//
-//    if (frame_cnt() > _frame + 1 && _time > _frame_times[_frame + 1]) {
-//        ++_frame;
-//    }
+
+    _time += delta;
+    if (_time > _end) {
+        reset();
+    }
+
+    if (frame_cnt() > _frame + 1 && _time > _frame_times[_frame + 1]) {
+        ++_frame;
+    }
 //
 //    if (_frame == frame_cnt() - 1) {
 //        for (auto i = 0; i < bone_cnt(); ++i) {
-//            ret[i] = _offsets[i] * _bone_srts[i][_frame].root_matrix();
+//            ret[i] = _offsets[i] * _bone_srts[i][_frame].affine_matrix();
 //        }
 //    } else {
 //        for (auto i = 0; i < bone_cnt(); ++i) {
@@ -104,14 +112,34 @@ animator::final_matrices_after(float delta, fuse::directx::skin_matrix &out) {
 //            lerp_srt.translation = Vector3::Lerp(
 //                    _bone_srts[i][_frame].translation,
 //                    _bone_srts[i][_frame].translation, t);
-//            ret[i] = _offsets[i] * lerp_srt.root_matrix();
+//            ret[i] = _offsets[i] * lerp_srt.affine_matrix() * conv_mat(
+//                    _anim->keyFrames[_bone_parents[i]][_frame].matTransform);
 //        }
 //    }
 //
+//    for (auto i = 0; i < min(sizeof(out.matrices) / sizeof(out.matrices[0]),
+//                             ret.size()); ++i) {
+//        out.matrices[i] = ret[i];
+//    }
+
+/** test code **/
     for (auto i = 0; i < min(sizeof(out.matrices) / sizeof(out.matrices[0]),
                              ret.size()); ++i) {
-        out.matrices[i] = ret[i];
+        if (_frame < _anim->keyFrames[i].size()) {
+            out.matrices[i] = _offsets[i] * conv_mat(_anim->keyFrames[i][_frame].matTransform);
+        } else {
+            out.matrices[i] = Matrix::Identity;
+        }
     }
+
+//    for (auto i = 0; i < min(sizeof(out.matrices) / sizeof(out.matrices[0]),
+//                             ret.size()); ++i) {
+//        if (_frame < _anim->keyFrames[i].size()) {
+//            out.matrices[i] = _offsets[i] * conv_mat(_anim->keyFrames[i][0].matTransform);
+//        } else {
+//            out.matrices[i] = Matrix::Identity;
+//        }
+//    }
 }
 
 Matrix transform::translation_matrix() const {

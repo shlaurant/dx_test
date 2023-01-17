@@ -275,6 +275,11 @@ namespace fuse::directx {
         cam_buf.vp = _main_camera->view() * _main_camera->projection();
         update_const_buffer<camera_buf>(_vp_buffer, &cam_buf, 0);
 
+        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
+            update_const_buffer<skin_matrix>(_skin_metrics_buf,
+                                             &(e->skin_matrices), e->id);
+        }
+
         ThrowIfFailed(_cmd_alloc->Reset())
         ThrowIfFailed(_cmd_list->Reset(_cmd_alloc.Get(), nullptr))
         _cmd_list->SetGraphicsRootSignature(

@@ -47,7 +47,7 @@ private:
         DirectX::SimpleMath::Vector4 rotation = DirectX::SimpleMath::Vector4::Zero;
         DirectX::SimpleMath::Vector3 translation = DirectX::SimpleMath::Vector3::Zero;
 
-        DirectX::SimpleMath::Matrix root_matrix();
+        DirectX::SimpleMath::Matrix affine_matrix() const;
     };
 
     double _start;
@@ -56,10 +56,13 @@ private:
     int _frame;
     std::vector<double> _frame_times;
     std::vector<DirectX::SimpleMath::Matrix> _offsets;
+    std::vector<int> _bone_parents;
     std::vector<std::vector<srt>> _bone_srts;//bone - frame
 
     inline size_t bone_cnt() {return _offsets.size();}
     inline size_t frame_cnt() {return _frame_times.size();}
+
+    std::shared_ptr<FbxAnimClipInfo> _anim;
 };
 
 DirectX::SimpleMath::Matrix conv_mat(const FbxMatrix &);
