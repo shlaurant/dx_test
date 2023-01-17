@@ -32,7 +32,7 @@ void animator::init(const std::shared_ptr<FbxAnimClipInfo> &anim,
 
     _offsets.resize(bones.size());
     for (auto i = 0; i < bones.size(); ++i) {
-        _offsets[i] = conv_mat(bones[i]->matOffset.Inverse());
+        _offsets[i] = conv_mat(bones[i]->matOffset.Transpose());
     }
 
     _bone_parents.resize(bones.size());
