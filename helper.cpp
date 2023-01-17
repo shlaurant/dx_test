@@ -52,18 +52,18 @@ void animator::init(const std::shared_ptr<FbxAnimClipInfo> &anim,
             if (fv.size() <= frame) {
                 //do nothing
             } else {
-                _bone_srts[bone][frame].scale.x = static_cast<float>(fv[frame].matTransform.GetS()[0]);
-                _bone_srts[bone][frame].scale.y = static_cast<float>(fv[frame].matTransform.GetS()[1]);
-                _bone_srts[bone][frame].scale.z = static_cast<float>(fv[frame].matTransform.GetS()[2]);
+                _bone_srts[bone][frame].scale.x = static_cast<float>(fv[frame].matTransform.GetS().mData[0]);
+                _bone_srts[bone][frame].scale.y = static_cast<float>(fv[frame].matTransform.GetS().mData[1]);
+                _bone_srts[bone][frame].scale.z = static_cast<float>(fv[frame].matTransform.GetS().mData[2]);
 
-                _bone_srts[bone][frame].rotation.x = static_cast<float>(fv[frame].matTransform.GetQ()[0]);
-                _bone_srts[bone][frame].rotation.y = static_cast<float>(fv[frame].matTransform.GetQ()[1]);
-                _bone_srts[bone][frame].rotation.z = static_cast<float>(fv[frame].matTransform.GetQ()[2]);
-                _bone_srts[bone][frame].rotation.w = static_cast<float>(fv[frame].matTransform.GetQ()[3]);
+                _bone_srts[bone][frame].rotation.x = static_cast<float>(fv[frame].matTransform.GetQ().mData[0]);
+                _bone_srts[bone][frame].rotation.y = static_cast<float>(fv[frame].matTransform.GetQ().mData[1]);
+                _bone_srts[bone][frame].rotation.z = static_cast<float>(fv[frame].matTransform.GetQ().mData[2]);
+                _bone_srts[bone][frame].rotation.w = static_cast<float>(fv[frame].matTransform.GetQ().mData[3]);
 
-                _bone_srts[bone][frame].translation.x = static_cast<float>(fv[frame].matTransform.GetT()[0]);
-                _bone_srts[bone][frame].translation.y = static_cast<float>(fv[frame].matTransform.GetT()[1]);
-                _bone_srts[bone][frame].translation.z = static_cast<float>(fv[frame].matTransform.GetT()[2]);
+                _bone_srts[bone][frame].translation.x = static_cast<float>(fv[frame].matTransform.GetT().mData[0]);
+                _bone_srts[bone][frame].translation.y = static_cast<float>(fv[frame].matTransform.GetT().mData[1]);
+                _bone_srts[bone][frame].translation.z = static_cast<float>(fv[frame].matTransform.GetT().mData[2]);
             }
         }
     }
@@ -93,49 +93,39 @@ animator::final_matrices_after(float delta, fuse::directx::skin_matrix &out) {
     if (frame_cnt() > _frame + 1 && _time > _frame_times[_frame + 1]) {
         ++_frame;
     }
-//
-//    if (_frame == frame_cnt() - 1) {
-//        for (auto i = 0; i < bone_cnt(); ++i) {
-//            ret[i] = _offsets[i] * _bone_srts[i][_frame].affine_matrix();
-//        }
-//    } else {
-//        for (auto i = 0; i < bone_cnt(); ++i) {
-//            auto t = (_time - _frame_times[_frame]) /
-//                     (_frame_times[_frame + 1] - _frame_times[_frame]);
-//            srt lerp_srt;
-//            lerp_srt.scale =
-//                    Vector3::Lerp(_bone_srts[i][_frame].scale,
-//                                  _bone_srts[i][_frame].scale, t);
-//            lerp_srt.rotation =
-//                    Vector4::Lerp(_bone_srts[i][_frame].rotation,
-//                                  _bone_srts[i][_frame].rotation, t);
-//            lerp_srt.translation = Vector3::Lerp(
-//                    _bone_srts[i][_frame].translation,
-//                    _bone_srts[i][_frame].translation, t);
-//            ret[i] = _offsets[i] * lerp_srt.affine_matrix() * conv_mat(
-//                    _anim->keyFrames[_bone_parents[i]][_frame].matTransform);
-//        }
-//    }
-//
-//    for (auto i = 0; i < min(sizeof(out.matrices) / sizeof(out.matrices[0]),
-//                             ret.size()); ++i) {
-//        out.matrices[i] = ret[i];
-//    }
 
-/** test code **/
-    for (auto i = 0; i < min(sizeof(out.matrices) / sizeof(out.matrices[0]),
-                             ret.size()); ++i) {
-        if (_frame < _anim->keyFrames[i].size()) {
-            out.matrices[i] = _offsets[i] * conv_mat(_anim->keyFrames[i][_frame].matTransform);
-        } else {
-            out.matrices[i] = Matrix::Identity;
+    if (_frame == frame_cnt() - 1) {
+        for (auto i = 0; i < bone_cnt(); ++i) {
+            ret[i] = _offsets[i] * _bone_srts[i][_frame].affine_matrix();
+        }
+    } else {
+        for (auto i = 0; i < bone_cnt(); ++i) {
+            auto t = (_time - _frame_times[_frame]) /
+                     (_frame_times[_frame + 1] - _frame_times[_frame]);
+            srt lerp_srt;
+            lerp_srt.scale =
+                    Vector3::Lerp(_bone_srts[i][_frame].scale,
+                                  _bone_srts[i][_frame].scale, t);
+            lerp_srt.rotation =Quaternion::Slerp(_bone_srts[i][_frame].rotation,
+                                  _bone_srts[i][_frame].rotation, t);
+            lerp_srt.translation = Vector3::Lerp(
+                    _bone_srts[i][_frame].translation,
+                    _bone_srts[i][_frame].translation, t);
+            ret[i] = _offsets[i] * lerp_srt.affine_matrix();
         }
     }
 
+    for (auto i = 0; i < min(sizeof(out.matrices) / sizeof(out.matrices[0]),
+                             ret.size()); ++i) {
+        out.matrices[i] = ret[i];
+    }
+//
+///** test code **/
 //    for (auto i = 0; i < min(sizeof(out.matrices) / sizeof(out.matrices[0]),
 //                             ret.size()); ++i) {
 //        if (_frame < _anim->keyFrames[i].size()) {
-//            out.matrices[i] = _offsets[i] * conv_mat(_anim->keyFrames[i][0].matTransform);
+//            auto t = _offsets[i] * _bone_srts[i][_frame].affine_matrix();
+//            out.matrices[i] = t;
 //        } else {
 //            out.matrices[i] = Matrix::Identity;
 //        }
