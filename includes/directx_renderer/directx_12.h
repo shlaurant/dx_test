@@ -15,7 +15,7 @@
 
 using namespace Microsoft::WRL;
 
-namespace fuse::directx {
+namespace directx_renderer {
     struct window_info {
         HWND hwnd;
         int32_t width;

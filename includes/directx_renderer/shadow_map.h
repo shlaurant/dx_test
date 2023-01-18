@@ -2,7 +2,7 @@
 
 using namespace Microsoft::WRL;
 
-namespace fuse::directx {
+namespace directx_renderer {
     class shadow_map {
     public:
         void init(ComPtr<ID3D12Device> device, int width, int height, D3D12_CPU_DESCRIPTOR_HANDLE dest);

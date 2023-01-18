@@ -5,7 +5,7 @@
 
 using namespace std;
 using namespace DirectX::SimpleMath;
-using namespace fuse::directx;
+using namespace directx_renderer;
 namespace fs = std::filesystem;
 
 FBXLoader::FBXLoader() {

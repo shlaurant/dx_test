@@ -5,7 +5,7 @@
 using namespace Microsoft::WRL;
 using namespace DirectX::SimpleMath;
 
-namespace fuse::directx {
+namespace directx_renderer {
     void
     resource::init(int obj_cnt, Microsoft::WRL::ComPtr<ID3D12Device> device,
                    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmd_list) {

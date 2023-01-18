@@ -2,7 +2,7 @@
 
 #include "d3dx12.h"
 
-namespace fuse::directx {
+namespace directx_renderer {
     static const DXGI_FORMAT RTV_FORMAT = DXGI_FORMAT_R8G8B8A8_UNORM;
     static const DXGI_FORMAT DSV_FORMAT = DXGI_FORMAT_D24_UNORM_S8_UINT;
     static const DXGI_FORMAT SHADOW_FORMAT = DXGI_FORMAT_R24G8_TYPELESS;

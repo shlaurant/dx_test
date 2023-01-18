@@ -1,6 +1,6 @@
 #include "constants.h"
 
-namespace fuse::directx {
+namespace directx_renderer {
     const CD3DX12_STATIC_SAMPLER_DESC
             sampler::POINT_WRAP(0, D3D12_FILTER_MIN_MAG_MIP_POINT,
                                 D3D12_TEXTURE_ADDRESS_MODE_WRAP,

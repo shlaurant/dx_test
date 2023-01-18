@@ -2,7 +2,7 @@
 
 #include "debug.h"
 
-namespace fuse::directx {
+namespace directx_renderer {
     template<typename T>
     Microsoft::WRL::ComPtr<ID3D12Resource> create_const_buffer(int elem_cnt,
                                                                Microsoft::WRL::ComPtr<ID3D12Device> device) {

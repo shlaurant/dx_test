@@ -2,7 +2,7 @@
 
 using namespace Microsoft::WRL;
 
-namespace fuse::directx {
+namespace directx_renderer {
     ComPtr <ID3D12Resource> create_upload_buffer(int elem_cnt, UINT64 elem_size,
                                                  ComPtr <ID3D12Device> device) {
         auto sz = elem_size * elem_cnt;

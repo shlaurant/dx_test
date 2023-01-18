@@ -2,7 +2,7 @@
 #include "debug.h"
 #include "constants.h"
 
-namespace fuse::directx {
+namespace directx_renderer {
     void shadow_map::init(ComPtr<ID3D12Device> device, int width, int height, D3D12_CPU_DESCRIPTOR_HANDLE dest) {
         viewport = {0.f, 0.f, (float) width, (float) height, 0.f, 1.f};
         scissors_rect = {0, 0, width, height};

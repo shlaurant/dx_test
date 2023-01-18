@@ -15,13 +15,13 @@ FBXLoader dragon_fbx;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-std::vector<fuse::directx::geometry<fuse::directx::vertex>> create_geometries();
-fuse::directx::light_info create_light_info();
+std::vector<directx_renderer::geometry<directx_renderer::vertex>> create_geometries();
+directx_renderer::light_info create_light_info();
 
-std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees();
-void load_geometries(fuse::directx::directx_12 &dx12);
-void load_materials(fuse::directx::directx_12 &dx12);
-void load_textures(fuse::directx::directx_12 &dx12);
+std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees();
+void load_geometries(directx_renderer::directx_12 &dx12);
+void load_materials(directx_renderer::directx_12 &dx12);
+void load_textures(directx_renderer::directx_12 &dx12);
 int
 WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                 int nCmdShow) {
@@ -63,7 +63,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
 
     MSG msg = {};
     try {
-        fuse::directx::directx_12 dx12;
+        directx_renderer::directx_12 dx12;
         GameTimer timer;
         timer.Reset();
 
@@ -73,12 +73,12 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         load_geometries(dx12);
         load_textures(dx12);
         load_materials(dx12);
-        std::vector<std::shared_ptr<fuse::directx::renderee>> renderees = build_renderees();
+        std::vector<std::shared_ptr<directx_renderer::renderee>> renderees = build_renderees();
         animator anim;
         anim.init(dragon_fbx.GetAnimClip()[0], dragon_fbx.GetBones());
         anim.final_matrices_after(0.f, renderees.back()->skin_matrices);
         dx12.init_renderees(renderees);
-        std::shared_ptr<fuse::directx::camera> camera = std::make_shared<fuse::directx::camera>();
+        std::shared_ptr<directx_renderer::camera> camera = std::make_shared<directx_renderer::camera>();
         camera->tr.rotation.x = DirectX::XM_PI / 4.f;
         camera->tr.position.z = -2.f;
         camera->tr.position.y = 5.f;
@@ -110,7 +110,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
 
     return 0;
 }
-void load_textures(fuse::directx::directx_12 &dx12) {
+void load_textures(directx_renderer::directx_12 &dx12) {
     dx12.load_texture("kyaru", L"resource\\kyaru.png");
     dx12.load_texture("white", L"resource\\white.png");
     dx12.load_texture("ground", L"resource\\ground_color.jpg");
@@ -131,7 +131,7 @@ void load_textures(fuse::directx::directx_12 &dx12) {
     dx12.load_texture("dragon_normal", L"resource\\dragon_normal.jpg");
 }
 
-void load_materials(fuse::directx::directx_12 &dx12) {
+void load_materials(directx_renderer::directx_12 &dx12) {
     dx12.load_material({"default", "metal", "rough", "glass", "terrain"},
                        {{Vector4(.5f, .5f, .5f, 1.f),
                                 Vector3(0.5f, 0.5f, 0.5f),      .5f},
@@ -145,11 +145,11 @@ void load_materials(fuse::directx::directx_12 &dx12) {
                                 Vector3(0.001f, 0.001, 0.001f), .99f}});
 }
 
-void load_geometries(fuse::directx::directx_12 &dx12) {
+void load_geometries(directx_renderer::directx_12 &dx12) {
     auto geo = create_geometries();
-    std::vector<fuse::directx::geometry<fuse::directx::vertex_billboard>> geo1;
+    std::vector<directx_renderer::geometry<directx_renderer::vertex_billboard>> geo1;
     geo1.resize(1);
-    fuse::directx::vertex_billboard v{Vector3(0.0f, 0.0f, 0.f),
+    directx_renderer::vertex_billboard v{Vector3(0.0f, 0.0f, 0.f),
                                       Vector2(1.f, 1.f)};
     geo1[0].name = "billboard";
     geo1[0].vertices = {{Vector3(0.0f, 0.0f, 0.f), Vector2(1.f, 1.f)},
@@ -159,15 +159,15 @@ void load_geometries(fuse::directx::directx_12 &dx12) {
     geo1[0].indices.emplace_back(1);
     geo1[0].indices.emplace_back(2);
 
-    dx12.init_geometries<fuse::directx::vertex>(geo);
-    dx12.init_geometries<fuse::directx::vertex_billboard>(geo1);
+    dx12.init_geometries<directx_renderer::vertex>(geo);
+    dx12.init_geometries<directx_renderer::vertex_billboard>(geo1);
 }
-std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
-    std::vector<std::shared_ptr<fuse::directx::renderee>> renderees;
+std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
+    std::vector<std::shared_ptr<directx_renderer::renderee>> renderees;
     {
-        auto skull0 = std::make_shared<fuse::directx::renderee>();
+        auto skull0 = std::make_shared<directx_renderer::renderee>();
         skull0->name = "skull0";
-        skull0->type = fuse::directx::renderee_type::opaque;
+        skull0->type = directx_renderer::renderee_type::opaque;
         skull0->geometry = "skull";
         skull0->texture[0] = "marble_diffuse";
         skull0->texture[1] = "default_normal";
@@ -176,9 +176,9 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         skull0->tr.position = Vector3(-5.f, 6.f, 3.f);
         renderees.emplace_back(skull0);
 
-        auto skull1 = std::make_shared<fuse::directx::renderee>();
+        auto skull1 = std::make_shared<directx_renderer::renderee>();
         skull1->name = "skull1";
-        skull1->type = fuse::directx::renderee_type::opaque;
+        skull1->type = directx_renderer::renderee_type::opaque;
         skull1->geometry = "skull";
         skull1->texture[0] = "marble_diffuse";
         skull1->texture[1] = "default_normal";
@@ -186,9 +186,9 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         skull1->tr.position = Vector3(-12.f, 1.f, 3.f);
         renderees.emplace_back(skull1);
 
-        auto skull2 = std::make_shared<fuse::directx::renderee>();
+        auto skull2 = std::make_shared<directx_renderer::renderee>();
         skull2->name = "skull2";
-        skull2->type = fuse::directx::renderee_type::opaque;
+        skull2->type = directx_renderer::renderee_type::opaque;
         skull2->geometry = "skull";
         skull2->texture[0] = "marble_diffuse";
         skull2->texture[1] = "default_normal";
@@ -196,9 +196,9 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         skull2->tr.position = Vector3(-19.f, 1.f, 3.f);
         renderees.emplace_back(skull2);
 
-        auto skull3 = std::make_shared<fuse::directx::renderee>();
+        auto skull3 = std::make_shared<directx_renderer::renderee>();
         skull3->name = "skull3";
-        skull3->type = fuse::directx::renderee_type::translucent;
+        skull3->type = directx_renderer::renderee_type::translucent;
         skull3->geometry = "skull";
         skull3->texture[0] = "marble_diffuse";
         skull3->texture[1] = "default_normal";
@@ -206,18 +206,18 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         skull3->tr.position = Vector3(-26.f, 1.f, 3.f);
         renderees.emplace_back(skull3);
 
-        auto wire = std::make_shared<fuse::directx::renderee>();
+        auto wire = std::make_shared<directx_renderer::renderee>();
         wire->name = "wire";
-        wire->type = fuse::directx::renderee_type::translucent;
+        wire->type = directx_renderer::renderee_type::translucent;
         wire->geometry = "cube";
         wire->texture[0] = "wire";
         wire->material = "rough";
         wire->tr.position = Vector3(0.f, 6.f, 3.f);
         renderees.emplace_back(wire);
 
-        auto cube0 = std::make_shared<fuse::directx::renderee>();
+        auto cube0 = std::make_shared<directx_renderer::renderee>();
         cube0->name = "cube0";
-        cube0->type = fuse::directx::renderee_type::translucent;
+        cube0->type = directx_renderer::renderee_type::translucent;
         cube0->geometry = "cube";
         cube0->texture[0] = "marble_diffuse";
         cube0->texture[1] = "marble_normal";
@@ -225,18 +225,18 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         cube0->tr.position = Vector3(3.f, 20.f, 3.f);
         renderees.emplace_back(cube0);
 
-        auto tree_billboard = std::make_shared<fuse::directx::renderee>();
+        auto tree_billboard = std::make_shared<directx_renderer::renderee>();
         tree_billboard->name = "tree_billboard";
-        tree_billboard->type = fuse::directx::renderee_type::billboard;
+        tree_billboard->type = directx_renderer::renderee_type::billboard;
         tree_billboard->geometry = "billboard";
         tree_billboard->texture[0] = "tree_arr";
         tree_billboard->material = "rough";
         tree_billboard->tr.position = Vector3(0.f, 6.f, 10.f);
         renderees.emplace_back(tree_billboard);
 
-        auto terrain = std::make_shared<fuse::directx::renderee>();
+        auto terrain = std::make_shared<directx_renderer::renderee>();
         terrain->name = "terrain";
-        terrain->type = fuse::directx::renderee_type::terrain;
+        terrain->type = directx_renderer::renderee_type::terrain;
         terrain->geometry = "terrain";
         terrain->texture[0] = "terrain_d";
         terrain->texture[1] = "terrain_h";
@@ -244,18 +244,18 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         terrain->tr.position = Vector3(0.f, 0.f, 0.f);
         renderees.emplace_back(terrain);
 
-        auto sky = std::make_shared<fuse::directx::renderee>();
+        auto sky = std::make_shared<directx_renderer::renderee>();
         sky->name = "sky";
-        sky->type = fuse::directx::renderee_type::skybox;
+        sky->type = directx_renderer::renderee_type::skybox;
         sky->geometry = "cube";
         sky->texture[0] = "skybox";
         sky->material = "";
         sky->tr.position = Vector3(0.f, 0.f, 0.f);
         renderees.emplace_back(sky);
 
-        auto body = std::make_shared<fuse::directx::renderee>();
+        auto body = std::make_shared<directx_renderer::renderee>();
         body->name = "body";
-        body->type = fuse::directx::renderee_type::opaque;
+        body->type = directx_renderer::renderee_type::opaque;
         body->geometry = "maleBodymesh";
         body->texture[0] = "male_diffuse";
         body->texture[1] = "male_normal";
@@ -264,18 +264,18 @@ std::vector<std::shared_ptr<fuse::directx::renderee>> build_renderees() {
         body->tr.position = Vector3(6.f, 12.f, 0.f);
 //        renderees.emplace_back(body);
 
-        auto house = std::make_shared<fuse::directx::renderee>();
+        auto house = std::make_shared<directx_renderer::renderee>();
         house->name = "house";
-        house->type = fuse::directx::renderee_type::opaque;
+        house->type = directx_renderer::renderee_type::opaque;
         house->geometry = "houseCube.009";
         house->texture[0] = "house_diffuse";
         house->material = "rough";
         house->tr.position = Vector3(0.f, 6.f, -5.f);
 //        renderees.emplace_back(house);
 
-        auto dragon = std::make_shared<fuse::directx::renderee>();
+        auto dragon = std::make_shared<directx_renderer::renderee>();
         dragon->name = "dragon";
-        dragon->type = fuse::directx::renderee_type::opaque_skinned;
+        dragon->type = directx_renderer::renderee_type::opaque_skinned;
         dragon->geometry = "dragonDragon_Mesh";
         dragon->texture[0] = "dragon_diffuse";
         dragon->texture[1] = "dragon_normal";
@@ -316,9 +316,9 @@ CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-std::vector<fuse::directx::geometry<fuse::directx::vertex>>
+std::vector<directx_renderer::geometry<directx_renderer::vertex>>
 create_geometries() {
-    std::vector<fuse::directx::geometry<fuse::directx::vertex>> ret;
+    std::vector<directx_renderer::geometry<directx_renderer::vertex>> ret;
 
     auto cube0 = create_cube_uv();
     cube0.name = "cube";
@@ -357,8 +357,8 @@ create_geometries() {
     return std::move(ret);
 }
 
-fuse::directx::light_info create_light_info() {
-    fuse::directx::light_info li;
+directx_renderer::light_info create_light_info() {
+    directx_renderer::light_info li;
     {
         li.active_count = 2;
 

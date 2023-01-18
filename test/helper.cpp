@@ -81,7 +81,7 @@ DirectX::SimpleMath::Matrix animator::srt::affine_matrix() const {
 }
 
 void
-animator::final_matrices_after(float delta, fuse::directx::skin_matrix &out) {
+animator::final_matrices_after(float delta, directx_renderer::skin_matrix &out) {
     std::vector<DirectX::SimpleMath::Matrix> ret;
     ret.resize(bone_cnt(), Matrix::Identity);
 
@@ -158,7 +158,7 @@ DirectX::SimpleMath::Matrix camera::projection() const {
                                              far_plane);
 }
 
-void handle_input(Input &input, std::shared_ptr<fuse::directx::camera> &camera,
+void handle_input(Input &input, std::shared_ptr<directx_renderer::camera> &camera,
                   const GameTimer &timer) {
     const float speed_c = 20.f;
     const float rot_c = .2f;
@@ -276,9 +276,9 @@ DirectX::SimpleMath::Vector4 mult(const Vector4 &v, const Matrix &m) {
     return ret;
 }
 
-fuse::directx::geometry<fuse::directx::vertex> create_cube() {
+directx_renderer::geometry<directx_renderer::vertex> create_cube() {
     static const float d = 0.5f;
-    fuse::directx::geometry<fuse::directx::vertex> ret;
+    directx_renderer::geometry<directx_renderer::vertex> ret;
 //    ret.vertices = {{{-d, d,  -d}, white()},
 //                    {{d,  d,  -d}, red()},
 //                    {{-d, -d, -d}, green()},
@@ -297,8 +297,8 @@ fuse::directx::geometry<fuse::directx::vertex> create_cube() {
     return ret;
 }
 
-fuse::directx::geometry<fuse::directx::vertex> create_tetra() {
-    fuse::directx::geometry<fuse::directx::vertex> ret;
+directx_renderer::geometry<directx_renderer::vertex> create_tetra() {
+    directx_renderer::geometry<directx_renderer::vertex> ret;
 //    static const float d = 0.5f;
 //    ret.vertices = {{{0.f, d * 2, 0.f}, red()},
 //                    {{0.f, 0.f,   d},   green()},
@@ -311,14 +311,14 @@ fuse::directx::geometry<fuse::directx::vertex> create_tetra() {
     return ret;
 }
 
-fuse::directx::geometry<fuse::directx::vertex> create_cube_uv() {
-    fuse::directx::geometry<fuse::directx::vertex> ret;
+directx_renderer::geometry<directx_renderer::vertex> create_cube_uv() {
+    directx_renderer::geometry<directx_renderer::vertex> ret;
 
     float w2 = 0.5f;
     float h2 = 0.5f;
     float d2 = 0.5f;
 
-    std::vector<fuse::directx::vertex> vec(24);
+    std::vector<directx_renderer::vertex> vec(24);
 
     vec[0] = {Vector3(-w2, -h2, -d2), Vector2(0.0f, 1.0f),
               Vector3(0.f, 0.f, -1.f)};
@@ -414,9 +414,9 @@ fuse::directx::geometry<fuse::directx::vertex> create_cube_uv() {
     return ret;
 }
 
-fuse::directx::geometry<fuse::directx::vertex>
+directx_renderer::geometry<directx_renderer::vertex>
 create_plain(int width, int height) {
-    fuse::directx::geometry<fuse::directx::vertex> ret;
+    directx_renderer::geometry<directx_renderer::vertex> ret;
 
     auto cnt = (width + 1) * (height + 1);
     ret.vertices.resize(cnt);
@@ -469,9 +469,9 @@ DirectX::SimpleMath::Vector3 read_v3(std::ifstream &ifs) {
     return Vector3(x, y, z);
 }
 
-fuse::directx::geometry<fuse::directx::vertex>
+directx_renderer::geometry<directx_renderer::vertex>
 load_mesh(const std::string &path) {
-    fuse::directx::geometry<fuse::directx::vertex> ret;
+    directx_renderer::geometry<directx_renderer::vertex> ret;
 
     std::ifstream fs(path.data());
     if (fs.is_open()) {
@@ -486,7 +486,7 @@ load_mesh(const std::string &path) {
         std::getline(fs, str);
 
         for (auto i = 0; i < vcnt; ++i) {
-            fuse::directx::vertex v;
+            directx_renderer::vertex v;
             v.position = read_v3(fs);
             v.normal = read_v3(fs);
             ret.vertices.emplace_back(v);
@@ -514,14 +514,14 @@ load_mesh(const std::string &path) {
     return ret;
 }
 
-fuse::directx::geometry<fuse::directx::vertex>
+directx_renderer::geometry<directx_renderer::vertex>
 create_terrain(int half, int unit_sz) {
-    fuse::directx::geometry<fuse::directx::vertex> ret;
+    directx_renderer::geometry<directx_renderer::vertex> ret;
 
 
     for (auto z = half; z >= -half; --z) {
         for (auto x = -half; x <= half; ++x) {
-            fuse::directx::vertex vert;
+            directx_renderer::vertex vert;
             vert.position.x = x * unit_sz;
             vert.position.y = 0;
             vert.position.z = z * unit_sz;
@@ -549,13 +549,13 @@ create_terrain(int half, int unit_sz) {
 }
 
 DirectX::SimpleMath::Vector3
-look_vector(std::shared_ptr<fuse::directx::camera> &p) {
+look_vector(std::shared_ptr<directx_renderer::camera> &p) {
     return {Vector4::Transform(Vector4::UnitZ, p->tr.rotation_matrix() *
                                                p->tr.translation_matrix())};
 }
 
 DirectX::SimpleMath::Vector3
-right_vector(std::shared_ptr<fuse::directx::camera> &p) {
+right_vector(std::shared_ptr<directx_renderer::camera> &p) {
     return {Vector4::Transform(Vector4::UnitX, p->tr.rotation_matrix() *
                                                p->tr.translation_matrix())};
 }

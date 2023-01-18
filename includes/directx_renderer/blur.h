@@ -2,7 +2,7 @@
 
 using namespace Microsoft::WRL;
 
-namespace fuse::directx {
+namespace directx_renderer {
     class blur {
     public:
         void init(ComPtr<ID3D12Device>, int32_t w, int32_t h);

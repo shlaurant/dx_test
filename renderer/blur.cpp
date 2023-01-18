@@ -1,7 +1,7 @@
 #include "blur.h"
 #include "directx_12.h"
 
-namespace fuse::directx {
+namespace directx_renderer {
     void blur::init(ComPtr<ID3D12Device> device, int32_t w, int32_t h) {
         width = w;
         height = h;

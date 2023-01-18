@@ -39,7 +39,7 @@ public:
               const std::vector<std::shared_ptr<FbxBoneInfo>> &bones);
     void reset();
     void
-    final_matrices_after(float delta, fuse::directx::skin_matrix &out); // linear interpolation
+    final_matrices_after(float delta, directx_renderer::skin_matrix &out); // linear interpolation
 
 private:
     struct srt {
@@ -67,10 +67,10 @@ private:
 
 DirectX::SimpleMath::Matrix conv_mat(const FbxMatrix &);
 
-DirectX::SimpleMath::Vector3 look_vector(std::shared_ptr<fuse::directx::camera> &);
-DirectX::SimpleMath::Vector3 right_vector(std::shared_ptr<fuse::directx::camera> &);
+DirectX::SimpleMath::Vector3 look_vector(std::shared_ptr<directx_renderer::camera> &);
+DirectX::SimpleMath::Vector3 right_vector(std::shared_ptr<directx_renderer::camera> &);
 
-void handle_input(Input &, std::shared_ptr<fuse::directx::camera> &,
+void handle_input(Input &, std::shared_ptr<directx_renderer::camera> &,
                   const GameTimer &);
 
 void print_matrix(const DirectX::SimpleMath::Matrix &);
@@ -83,13 +83,13 @@ void print_transform(const transform &);
 DirectX::SimpleMath::Vector4
 mult(const DirectX::SimpleMath::Vector4 &, const DirectX::SimpleMath::Matrix &);
 
-fuse::directx::geometry<fuse::directx::vertex> create_cube();
+directx_renderer::geometry<directx_renderer::vertex> create_cube();
 
-fuse::directx::geometry<fuse::directx::vertex> create_tetra();
+directx_renderer::geometry<directx_renderer::vertex> create_tetra();
 
-fuse::directx::geometry<fuse::directx::vertex> create_cube_uv();
+directx_renderer::geometry<directx_renderer::vertex> create_cube_uv();
 
-fuse::directx::geometry<fuse::directx::vertex>
+directx_renderer::geometry<directx_renderer::vertex>
 create_plain(int width, int height);
 
 DirectX::SimpleMath::Vector4 white();
@@ -97,8 +97,8 @@ DirectX::SimpleMath::Vector4 red();
 DirectX::SimpleMath::Vector4 green();
 DirectX::SimpleMath::Vector4 blue();
 
-fuse::directx::geometry<fuse::directx::vertex>
+directx_renderer::geometry<directx_renderer::vertex>
 load_mesh(const std::string &path);
 
-fuse::directx::geometry<fuse::directx::vertex>
+directx_renderer::geometry<directx_renderer::vertex>
 create_terrain(int half, int unit_sz);

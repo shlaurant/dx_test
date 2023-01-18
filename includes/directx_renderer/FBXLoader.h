@@ -46,7 +46,7 @@ struct BoneWeight {
 
 struct FbxMeshInfo {
     std::wstring name;
-    std::vector<fuse::directx::vertex> vertices;
+    std::vector<directx_renderer::vertex> vertices;
     std::vector<std::vector<uint32_t>> indices;
     std::vector<FbxMaterialInfo> materials;
     std::vector<BoneWeight> boneWeights;
@@ -79,7 +79,7 @@ public:
 
 public:
     void LoadFbx(const std::wstring &path, const std::string &name);
-    std::vector<fuse::directx::geometry<fuse::directx::vertex>> geometries();
+    std::vector<directx_renderer::geometry<directx_renderer::vertex>> geometries();
     std::vector<std::wstring> textures();
 
 public:

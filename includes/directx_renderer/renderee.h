@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-namespace fuse::directx {
+namespace directx_renderer {
     enum class renderee_type : uint8_t {
         opaque, translucent, billboard, terrain, skybox, opaque_skinned, count
     };

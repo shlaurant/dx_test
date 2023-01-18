@@ -1,6 +1,6 @@
 #pragma once
 
-namespace fuse {
+namespace directx_renderer {
     class type_id_s {
     public:
         static type_id_s *instance() {

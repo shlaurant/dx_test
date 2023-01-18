@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-namespace fuse::directx {
+namespace directx_renderer {
     class resource {
     public:
         void init(int, Microsoft::WRL::ComPtr<ID3D12Device>,

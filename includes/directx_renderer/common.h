@@ -2,7 +2,7 @@
 
 #include "SimpleMath.h"
 
-namespace fuse::directx {
+namespace directx_renderer {
     struct transform {
         DirectX::SimpleMath::Vector3 position = DirectX::SimpleMath::Vector3::Zero;
         DirectX::SimpleMath::Vector3 rotation = DirectX::SimpleMath::Vector3::Zero;

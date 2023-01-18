@@ -6,7 +6,7 @@
 using namespace Microsoft::WRL;
 using namespace DirectX::SimpleMath;
 
-namespace fuse::directx {
+namespace directx_renderer {
     void directx_12::init(const window_info &info) {
         {
             ComPtr<ID3D12Debug> debugController;
