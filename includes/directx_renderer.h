@@ -13,7 +13,6 @@
 #include <iostream>
 #include <map>
 
-#include <windows.h>
 #include <wrl.h>
 #include <d3dcompiler.h>
 #include <dxgi.h>
