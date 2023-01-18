@@ -1,8 +1,8 @@
 #pragma once
 
 #include <FBXLoader.h>
+#include <directx_renderer.h>
 #include "Input.h"
-#include "src/common.h"
 #include "GameTimer.h"
 
 struct transform {

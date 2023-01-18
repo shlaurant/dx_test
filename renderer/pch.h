@@ -11,7 +11,7 @@
 #include <iostream>
 #include <map>
 
-#include "d3dx12.h"
+#include <d3dx12.h>
 #include <windows.h>
 #include <wrl.h>
 #include <d3dcompiler.h>
@@ -21,4 +21,4 @@
 #include <DirectXColors.h>
 #include <DirectXTex.h>
 #include <fbxsdk.h>
-#include "SimpleMath.h"
+#include <SimpleMath.h>
