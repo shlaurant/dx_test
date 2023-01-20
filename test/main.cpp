@@ -1,7 +1,7 @@
 #include <WinUser.h>
 #include <windowsx.h>
 
-#include "directx_12.h"
+#include "directx_renderer.h"
 #include "debug.h"
 #include "helper.h"
 #include "Input.h"

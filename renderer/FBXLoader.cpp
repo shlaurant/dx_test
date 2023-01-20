@@ -130,7 +130,7 @@ void FBXLoader::LoadMesh(FbxMesh *mesh) {
     assert(polygonSize == 3);
 
     uint32_t arrIdx[3];
-    uint32_t vertexCounter = 0; // ������ ����
+    uint32_t vertexCounter = 0;
 
     const int32_t triCount = mesh->GetPolygonCount();
     for (int32_t i = 0; i < triCount; i++) {
@@ -552,7 +552,6 @@ FBXLoader::LoadKeyframe(int32_t animIndex, FbxNode *node, FbxCluster *cluster,
 
     FbxTime::EMode timeMode = _scene->GetGlobalSettings().GetTimeMode();
 
-    // �ִϸ��̼� �����
     FbxAnimStack *animStack = _scene->FindMember<FbxAnimStack>(
             _animNames[animIndex]->Buffer());
     _scene->SetCurrentAnimationStack(OUT animStack);

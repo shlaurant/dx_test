@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include <algorithm>
 #include <vector>
 #include <memory>
@@ -19,10 +17,10 @@
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
-#include <DirectXTex.h>
 #include <fbxsdk.h>
+#include <DirectXTex.h>
 
-#include "directx_renderer/d3dx12.h"
 #include "directx_renderer/SimpleMath.h"
 #include "directx_renderer/directx_12.h"
 #include "directx_renderer/common.h"
+#include "directx_renderer/FBXLoader.h"

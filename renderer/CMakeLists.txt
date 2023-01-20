@@ -1,4 +1,4 @@
-project(renderer)
+project(directx_renderer)
 
 file(GLOB_RECURSE SRC_FILES *.cpp CMAKE_CONFIGURE_DEPENDS)
 add_library(${PROJECT_NAME} ${SRC_FILES})
