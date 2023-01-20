@@ -1,4 +1,4 @@
-#include "directx_12.h"
+#include "dx12_renderer.h"
 #include "debug.h"
 #include "dx_util.h"
 #include "ReadData.h"
@@ -7,7 +7,7 @@ using namespace Microsoft::WRL;
 using namespace DirectX::SimpleMath;
 
 namespace directx_renderer {
-    void directx_12::init(const window_info &info) {
+    void dx12_renderer::init(const window_info &info) {
         {
             ComPtr<ID3D12Debug> debugController;
             if (SUCCEEDED(
@@ -38,20 +38,20 @@ namespace directx_renderer {
         SetWindowPos(info.hwnd, 0, 100, 100, info.width, info.height, 0);
     }
 
-    void directx_12::set_main_camera(std::shared_ptr<camera> p) {
+    void dx12_renderer::set_main_camera(std::shared_ptr<camera> p) {
         _main_camera = std::move(p);
     }
 
-    void directx_12::update_camera(const camera_buf &cam) {
+    void dx12_renderer::update_camera(const camera_buf &cam) {
         update_const_buffer<camera_buf>(_vp_buffer, &cam, 0);
     }
 
-    void directx_12::update_lights(const light_info &info) {
+    void dx12_renderer::update_lights(const light_info &info) {
         update_const_buffer<light_info>(_light_buffer, &info, 0);
     }
 
     void
-    directx_12::init_renderees(std::vector<std::shared_ptr<renderee>> vec) {
+    dx12_renderer::init_renderees(std::vector<std::shared_ptr<renderee>> vec) {
         _renderees.clear();
         _renderees.resize(static_cast<uint8_t>(renderee_type::count));
 
@@ -112,7 +112,7 @@ namespace directx_renderer {
         }
     }
 
-    void directx_12::render() {
+    void dx12_renderer::render() {
         _cmd_list->IASetVertexBuffers(0, 1,
                                       &(_vertex_buffers[type_id<vertex_billboard>()].second));
         _cmd_list->IASetIndexBuffer(
@@ -170,8 +170,8 @@ namespace directx_renderer {
         }
     }
 
-    void directx_12::load_texture(const std::string &name,
-                                  const std::wstring &path) {
+    void dx12_renderer::load_texture(const std::string &name,
+                                     const std::wstring &path) {
         ThrowIfFailed(_cmd_alloc->Reset());
         ThrowIfFailed(_cmd_list->Reset(_cmd_alloc.Get(), nullptr));
 
@@ -213,9 +213,9 @@ namespace directx_renderer {
         _textures[name] = std::make_pair(desc, buf);
     }
 
-    ComPtr<ID3D12Resource> directx_12::load_texture(const std::wstring &path,
-                                                    DirectX::ScratchImage &image,
-                                                    ComPtr<ID3D12Resource> &upload_buffer) {
+    ComPtr<ID3D12Resource> dx12_renderer::load_texture(const std::wstring &path,
+                                                       DirectX::ScratchImage &image,
+                                                       ComPtr<ID3D12Resource> &upload_buffer) {
         auto ext = std::filesystem::path(path).extension();
 
         if (ext == L".dds" || ext == L".DDS") {
@@ -250,7 +250,7 @@ namespace directx_renderer {
     }
 
     void
-    directx_12::bind_texture(int obj, const std::string &texture, int regi) {
+    dx12_renderer::bind_texture(int obj, const std::string &texture, int regi) {
         auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
         auto handle_sz = _device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -261,15 +261,15 @@ namespace directx_renderer {
         _device->CreateShaderResourceView(texture_res.Get(), &desc, handle);
     }
 
-    void directx_12::load_material(const std::vector<std::string> &names,
-                                   const std::vector<material> &mat) {
+    void dx12_renderer::load_material(const std::vector<std::string> &names,
+                                      const std::vector<material> &mat) {
         for (auto i = 0; i < names.size(); ++i) {
             update_upload_buffer(_mat_buffer, &(mat[i]), i, sizeof(material));
             _mat_ids[names[i]] = i;
         }
     }
 
-    void directx_12::render_begin() {
+    void dx12_renderer::render_begin() {
         camera_buf cam_buf;
         cam_buf.position = _main_camera->tr.position;
         cam_buf.vp = _main_camera->view() * _main_camera->projection();
@@ -380,7 +380,7 @@ namespace directx_renderer {
                                       &_dsv_handle);
     }
 
-    void directx_12::render_end() {
+    void dx12_renderer::render_end() {
         auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
                 _msaa_render_buffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET,
                 D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
@@ -410,7 +410,7 @@ namespace directx_renderer {
         wait_cmd_queue_sync();
     }
 
-    void directx_12::render(const std::vector<render_info> &infos) {
+    void dx12_renderer::render(const std::vector<render_info> &infos) {
         _cmd_list->IASetVertexBuffers(0, 1,
                                       &(_vertex_buffers[type_id<vertex_billboard>()].second));
         _cmd_list->IASetIndexBuffer(
@@ -510,7 +510,7 @@ namespace directx_renderer {
         }
     }
 
-    void directx_12::render(const render_info &info) {
+    void dx12_renderer::render(const render_info &info) {
         auto handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += group_size() * info.object_index;
         _cmd_list->SetGraphicsRootDescriptorTable(4, handle);
@@ -519,7 +519,7 @@ namespace directx_renderer {
                                         info.vertex_offset, 0);
     }
 
-    void directx_12::render(const std::shared_ptr<renderee> &r) {
+    void dx12_renderer::render(const std::shared_ptr<renderee> &r) {
         auto handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += group_size() * r->id;
         _cmd_list->SetGraphicsRootDescriptorTable(5, handle);
@@ -529,7 +529,7 @@ namespace directx_renderer {
                                         r->geo.vertex_offset, 0);
     }
 
-    void directx_12::init_base(const window_info &info) {
+    void dx12_renderer::init_base(const window_info &info) {
         CreateDXGIFactory1(IID_PPV_ARGS(&_factory));
         D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0,
                           IID_PPV_ARGS(&_device));
@@ -548,7 +548,7 @@ namespace directx_renderer {
         msaa_quality_levels = quality_levels.NumQualityLevels;
     }
 
-    void directx_12::init_cmds() {
+    void dx12_renderer::init_cmds() {
         D3D12_COMMAND_QUEUE_DESC queue_desc = {D3D12_COMMAND_LIST_TYPE_DIRECT,
                                                0, D3D12_COMMAND_QUEUE_FLAG_NONE,
                                                0};
@@ -562,7 +562,7 @@ namespace directx_renderer {
         _device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence));
     }
 
-    void directx_12::init_swap_chain(const window_info &info) {
+    void dx12_renderer::init_swap_chain(const window_info &info) {
         _swap_chain.Reset();
         DXGI_SWAP_CHAIN_DESC swap_desc;
         swap_desc.BufferDesc.Width = static_cast<uint32_t>(info.width);
@@ -584,7 +584,7 @@ namespace directx_renderer {
                                                 &_swap_chain))
     }
 
-    void directx_12::init_rtv(const window_info &info) {
+    void dx12_renderer::init_rtv(const window_info &info) {
         auto rtv_heap_size = _device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
         D3D12_DESCRIPTOR_HEAP_DESC rtv_dh_desc;
@@ -637,7 +637,7 @@ namespace directx_renderer {
                                         _msaa_render_buffer_heap->GetCPUDescriptorHandleForHeapStart());
     }
 
-    void directx_12::init_dsv(const window_info &info) {
+    void dx12_renderer::init_dsv(const window_info &info) {
         D3D12_DESCRIPTOR_HEAP_DESC dh_desc = {};
         dh_desc.NumDescriptors = 1;
         dh_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -670,7 +670,7 @@ namespace directx_renderer {
                                         _dsv_handle);
     }
 
-    void directx_12::init_global_buf() {
+    void dx12_renderer::init_global_buf() {
         _global_buffer = create_const_buffer<global>(1, _device);
         auto plane = Plane(Vector3(0.f, 0.001f, 0.f), Vector3::Up);
         auto n = Vector4(0.f, -1.f, 1.f, 0.f);
@@ -680,15 +680,15 @@ namespace directx_renderer {
         update_const_buffer(_global_buffer, &_global, 0);
     }
 
-    void directx_12::init_camera_buf() {
+    void dx12_renderer::init_camera_buf() {
         _vp_buffer = create_const_buffer<camera_buf>(1, _device);
     }
 
-    void directx_12::init_light_buf() {
+    void dx12_renderer::init_light_buf() {
         _light_buffer = create_const_buffer<light_info>(2, _device);
     }
 
-    void directx_12::init_resources() {
+    void dx12_renderer::init_resources() {
         _obj_const_buffer = create_const_buffer<object_constant>(OBJ_CNT,
                                                                  _device);
         _skin_metrics_buf = create_const_buffer<skin_matrix>(OBJ_CNT, _device);
@@ -726,12 +726,12 @@ namespace directx_renderer {
         }
     }
 
-    void directx_12::init_root_signature() {
+    void dx12_renderer::init_root_signature() {
         init_default_signature();
         init_blur_signature();
     }
 
-    void directx_12::init_shadow_signature() {
+    void dx12_renderer::init_shadow_signature() {
         CD3DX12_ROOT_PARAMETER param[1];
         param[1].InitAsConstantBufferView(0);
         auto rs_desc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param, 0,
@@ -748,7 +748,7 @@ namespace directx_renderer {
                                                            &_signatures[shader_type::shadow])));
     }
 
-    void directx_12::init_terrain_signature() {
+    void dx12_renderer::init_terrain_signature() {
         CD3DX12_DESCRIPTOR_RANGE ranges[] = {
                 CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 3),
                 CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0)
@@ -778,7 +778,7 @@ namespace directx_renderer {
                                                            &_signatures[shader_type::terrain])));
     }
 
-    void directx_12::init_blur_signature() {
+    void dx12_renderer::init_blur_signature() {
         CD3DX12_DESCRIPTOR_RANGE blur_ranges[] = {
                 CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0),
                 CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0)
@@ -804,7 +804,7 @@ namespace directx_renderer {
                                                    IID_PPV_ARGS(
                                                            &_signatures[shader_type::blur])));
     }
-    void directx_12::init_default_signature() {
+    void dx12_renderer::init_default_signature() {
         CD3DX12_DESCRIPTOR_RANGE t0[] = {
                 CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0),
         };
@@ -840,7 +840,7 @@ namespace directx_renderer {
                                                            &_signatures[shader_type::general])));
     }
 
-    void directx_12::init_shader() {
+    void dx12_renderer::init_shader() {
 #if defined(_DEBUG)
         UINT compile_flags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #else
@@ -999,12 +999,12 @@ namespace directx_renderer {
                                                                    &_pso_list[static_cast<uint8_t>(layer::skinned)])));
     }
 
-    void directx_12::execute_cmd_list() {
+    void dx12_renderer::execute_cmd_list() {
         ID3D12CommandList *cmd_list_arr[] = {_cmd_list.Get()};
         _cmd_queue->ExecuteCommandLists(_countof(cmd_list_arr), cmd_list_arr);
     }
 
-    void directx_12::wait_cmd_queue_sync() {
+    void dx12_renderer::wait_cmd_queue_sync() {
         ++_fence_value;
         _cmd_queue->Signal(_fence.Get(), _fence_value);
         if (_fence->GetCompletedValue() < _fence_value) {
@@ -1016,12 +1016,12 @@ namespace directx_renderer {
         }
     }
 
-    UINT directx_12::group_size() {
+    UINT dx12_renderer::group_size() {
         return _device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) * TABLE_SIZE;
     }
 
-    D3D12_CPU_DESCRIPTOR_HANDLE directx_12::shadow_handle() {
+    D3D12_CPU_DESCRIPTOR_HANDLE dx12_renderer::shadow_handle() {
         auto ret = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
         ret.ptr += OBJ_CNT * group_size();
         ret.ptr += _device->GetDescriptorHandleIncrementSize(

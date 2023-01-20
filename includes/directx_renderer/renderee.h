@@ -31,6 +31,6 @@ namespace directx_renderer {
         geo_info geo;
         object_constant constants;
 
-        friend class directx_12;
+        friend class dx12_renderer;
     };
 }

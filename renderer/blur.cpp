@@ -1,5 +1,5 @@
 #include "blur.h"
-#include "directx_12.h"
+#include "dx12_renderer.h"
 
 namespace directx_renderer {
     void blur::init(ComPtr<ID3D12Device> device, int32_t w, int32_t h) {

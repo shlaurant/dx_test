@@ -19,9 +19,9 @@ std::vector<directx_renderer::geometry<directx_renderer::vertex>> create_geometr
 directx_renderer::light_info create_light_info();
 
 std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees();
-void load_geometries(directx_renderer::directx_12 &dx12);
-void load_materials(directx_renderer::directx_12 &dx12);
-void load_textures(directx_renderer::directx_12 &dx12);
+void load_geometries(directx_renderer::dx12_renderer &dx12);
+void load_materials(directx_renderer::dx12_renderer &dx12);
+void load_textures(directx_renderer::dx12_renderer &dx12);
 int
 WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                 int nCmdShow) {
@@ -63,7 +63,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
 
     MSG msg = {};
     try {
-        directx_renderer::directx_12 dx12;
+        directx_renderer::dx12_renderer dx12;
         GameTimer timer;
         timer.Reset();
 
@@ -110,7 +110,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
 
     return 0;
 }
-void load_textures(directx_renderer::directx_12 &dx12) {
+void load_textures(directx_renderer::dx12_renderer &dx12) {
     dx12.load_texture("kyaru", L"resource\\kyaru.png");
     dx12.load_texture("white", L"resource\\white.png");
     dx12.load_texture("ground", L"resource\\ground_color.jpg");
@@ -131,7 +131,7 @@ void load_textures(directx_renderer::directx_12 &dx12) {
     dx12.load_texture("dragon_normal", L"resource\\dragon_normal.jpg");
 }
 
-void load_materials(directx_renderer::directx_12 &dx12) {
+void load_materials(directx_renderer::dx12_renderer &dx12) {
     dx12.load_material({"default", "metal", "rough", "glass", "terrain"},
                        {{Vector4(.5f, .5f, .5f, 1.f),
                                 Vector3(0.5f, 0.5f, 0.5f),      .5f},
@@ -145,7 +145,7 @@ void load_materials(directx_renderer::directx_12 &dx12) {
                                 Vector3(0.001f, 0.001, 0.001f), .99f}});
 }
 
-void load_geometries(directx_renderer::directx_12 &dx12) {
+void load_geometries(directx_renderer::dx12_renderer &dx12) {
     auto geo = create_geometries();
     std::vector<directx_renderer::geometry<directx_renderer::vertex_billboard>> geo1;
     geo1.resize(1);

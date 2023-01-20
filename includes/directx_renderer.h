@@ -21,6 +21,6 @@
 #include <DirectXTex.h>
 
 #include "directx_renderer/SimpleMath.h"
-#include "directx_renderer/directx_12.h"
+#include "directx_renderer/dx12_renderer.h"
 #include "directx_renderer/common.h"
 #include "directx_renderer/FBXLoader.h"

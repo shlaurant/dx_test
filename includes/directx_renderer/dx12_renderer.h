@@ -23,7 +23,7 @@ namespace directx_renderer {
         bool windowed;
     };
 
-    class directx_12 {
+    class dx12_renderer {
     public:
         const static int SWAP_CHAIN_BUFFER_COUNT = 2;
         const static int OBJ_CNT = 20;
