@@ -3,6 +3,8 @@
 #include "SimpleMath.h"
 
 namespace directx_renderer {
+    const int LIGHT_MAX_CNT = 50;//should be same with LIGHT_COUNT in shader code
+
     struct transform {
         DirectX::SimpleMath::Vector3 position = DirectX::SimpleMath::Vector3::Zero;
         DirectX::SimpleMath::Vector3 rotation = DirectX::SimpleMath::Vector3::Zero;
@@ -114,7 +116,7 @@ namespace directx_renderer {
     };
 
     struct light_info {
-        light lights[50];//should be same with LIGHT_COUNT in shader code
+        light lights[LIGHT_MAX_CNT];
         int active_count;
         DirectX::SimpleMath::Vector3 pad0;
     };
@@ -126,6 +128,15 @@ namespace directx_renderer {
         DirectX::SimpleMath::Matrix shadow_matrix;
         DirectX::SimpleMath::Matrix light_vp;
         DirectX::SimpleMath::Matrix shadow_uv_matrix;
+    };
+
+    struct global_frame {
+        DirectX::SimpleMath::Matrix view_proj;
+        DirectX::SimpleMath::Vector3 camera_pos;
+        uint32_t active_lights;
+        light lights[LIGHT_MAX_CNT];
+        DirectX::SimpleMath::Matrix light_view_proj;
+        DirectX::SimpleMath::Matrix shadow_uv_matrix;//transforms a point into uv coordinate of the shadow map texture
     };
 
     struct skin_matrix {
