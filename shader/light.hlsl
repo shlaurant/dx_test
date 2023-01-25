@@ -9,8 +9,7 @@ struct material {
     float roughness;
     uint texture_diffuse;
     uint texture_normal;
-    float pad0;
-    float pad1;
+    float2 pad0;
 };
 
 struct light {

@@ -81,15 +81,15 @@ void GS_Main(point VS_OUT input[1], uint id:SV_PrimitiveID, inout TriangleStream
 float4 PS_Main(GS_OUT input):SV_Target
 {
     float3 uvw = float3(input.uv, input.id % 3);
-    float4 diffuse_albedo = tex_arr.Sample(sam_aw, uvw) * materials[obj_pad0].diffuse_albedo;
-    clip(diffuse_albedo.w * materials[obj_pad0].diffuse_albedo.w - 0.1f);
+    float4 diffuse_albedo = tex_arr.Sample(sam_aw, uvw) * materials[obj_material].diffuse_albedo;
+    clip(diffuse_albedo.w * materials[obj_material].diffuse_albedo.w - 0.1f);
 
 #ifdef SHADOW
     float4 color = float4(0.f, 0.f, 0.f, 0.5f);
 #else
     input.normal = normalize(input.normal);
 
-    material new_mat = {diffuse_albedo, materials[obj_pad0].fresnel_r0, materials[obj_pad0].roughness};
+    material new_mat = {diffuse_albedo, materials[obj_material].fresnel_r0, materials[obj_material].roughness, materials[obj_material].texture_diffuse, materials[obj_material].texture_normal, materials[obj_material].pad0};
     float3 to_eye = normalize(camera_pos - input.pos_w.xyz);
     float4 light_color = calc_light(lights, active_light_counts, new_mat, input.pos_w.xyz, input.normal, to_eye);
     float4 color = light_color;

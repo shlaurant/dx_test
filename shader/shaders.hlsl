@@ -66,8 +66,8 @@ VS_OUT VS_Main(VS_IN input)
 
 float4 PS_Main(VS_OUT input) : SV_Target
 {
-    float4 diffuse_albedo = tex.Sample(sam_aw, input.uv) * materials[obj_pad0].diffuse_albedo;
-    clip(diffuse_albedo.w * materials[obj_pad0].diffuse_albedo.w - 0.1f);
+    float4 diffuse_albedo = tex.Sample(sam_aw, input.uv) * materials[obj_material].diffuse_albedo;
+    clip(diffuse_albedo.w * materials[obj_material].diffuse_albedo.w - 0.1f);
 
 #ifdef SHADOW
     float4 color = float4(0.f, 0.f, 0.f, 0.5f);
@@ -81,7 +81,7 @@ float4 PS_Main(VS_OUT input) : SV_Target
     float shadow_factor = calc_shadow_factor(shadow_pos);
 
 
-    material new_mat = {diffuse_albedo, materials[obj_pad0].fresnel_r0, materials[obj_pad0].roughness};
+    material new_mat = {diffuse_albedo, materials[obj_material].fresnel_r0, materials[obj_material].roughness, materials[obj_material].texture_diffuse, materials[obj_material].texture_normal, materials[obj_material].pad0};
     float3 to_eye = normalize(camera_pos - input.pos_w.xyz);
     float4 light_color = calc_light(lights, active_light_counts, new_mat, input.pos_w.xyz, normal, to_eye, shadow_factor);
     float4 color = light_color;

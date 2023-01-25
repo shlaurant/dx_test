@@ -131,13 +131,13 @@ DS_OUT DS(CHS_OUT patch, float3 location : SV_DomainLocation, const OutputPatch<
 
 float4 PS(DS_OUT input) :SV_Target
 {
-    float4 diffuse_albedo = tex_diffuse.Sample(sam_aw, input.uv) * materials[obj_pad0].diffuse_albedo;
+    float4 diffuse_albedo = tex_diffuse.Sample(sam_aw, input.uv) * materials[obj_material].diffuse_albedo;
     input.normal = normalize(input.normal);
 
     float4 shadow_pos = mul(input.pos_w, shadow_uv_matrix);
     float shadow_factor = calc_shadow_factor(shadow_pos);
     
-    material new_mat = {diffuse_albedo, materials[obj_pad0].fresnel_r0, materials[obj_pad0].roughness};
+    material new_mat = {diffuse_albedo, materials[obj_material].fresnel_r0, materials[obj_material].roughness, materials[obj_material].texture_diffuse, materials[obj_material].texture_normal, materials[obj_material].pad0};
     float3 to_eye = normalize(camera_pos - input.pos_w.xyz);
     float4 light_color = calc_light(lights, active_light_counts, new_mat, input.pos_w.xyz, input.normal, to_eye, shadow_factor);
     float4 color = light_color;

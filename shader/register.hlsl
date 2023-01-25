@@ -1,7 +1,7 @@
 #ifndef GUARD_REGISTER
 #define GUARD_REGISTER
 
-#define MAX_TEX_CNT 64;
+#define MAX_TEX_CNT 64
 #define MAX_BONE_CNT 256
 
 cbuffer globals :register(b0) {
@@ -22,7 +22,7 @@ cbuffer globals_frame :register(b1) {
 
 cbuffer object_const :register(b2) {
     float3 obj_position;
-    int obj_pad0;
+    int obj_material;
     row_major float4x4 w;
 };
 
