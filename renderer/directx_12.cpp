@@ -45,22 +45,16 @@ namespace directx_renderer {
     void dx12_renderer::update_frame_resource(const global_frame &gf,
                                               const std::vector<object_constant> &ocv,
                                               const std::vector<skin_matrix> &smv) {
-        if(_frame_resource_buffer->is_waiting(_fence->GetCompletedValue())){
-            auto handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
-            ThrowIfFailed(_fence->SetEventOnCompletion(_frame_resource_buffer->fence_in_wait(), handle));
+        if (_frame_resource_buffer->is_waiting(_fence->GetCompletedValue())) {
+            auto handle = CreateEventEx(nullptr, false, false,
+                                        EVENT_ALL_ACCESS);
+            ThrowIfFailed(_fence->SetEventOnCompletion(
+                    _frame_resource_buffer->fence_in_wait(), handle));
             WaitForSingleObject(handle, INFINITE);
             CloseHandle(handle);
         }
 
         _frame_resource_buffer->put(gf, ocv, smv, ++_fence_value);
-    }
-
-    void dx12_renderer::update_camera(const camera_buf &cam) {
-        update_const_buffer<camera_buf>(_vp_buffer, &cam, 0);
-    }
-
-    void dx12_renderer::update_lights(const light_info &info) {
-        update_const_buffer<light_info>(_light_buffer, &info, 0);
     }
 
     void
@@ -114,13 +108,13 @@ namespace directx_renderer {
                 if (!ptr->material.empty()) ptr->constants.mat_id = _mat_ids[ptr->material];
                 ptr->constants.position = ptr->tr.position;
                 ptr->constants.world_matrix = ptr->tr.world_matrix();
-
-                update_const_buffer(_obj_const_buffer, &(ptr->constants),
-                                    ptr->id);
-
-                if (ptr->type == renderee_type::opaque_skinned)
-                    update_const_buffer(_skin_metrics_buf,
-                                        &(ptr->skin_matrices), ptr->id);
+//
+//                update_const_buffer(_obj_const_buffer, &(ptr->constants),
+//                                    ptr->id);
+//
+//                if (ptr->type == renderee_type::opaque_skinned)
+//                    update_const_buffer(_skin_metrics_buf,
+//                                        &(ptr->skin_matrices), ptr->id);
             }
         }
     }
@@ -206,7 +200,7 @@ namespace directx_renderer {
             desc.TextureCube.MipLevels = meta.mipLevels;
             desc.TextureCube.MostDetailedMip = 0;
 
-            auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
+            auto handle = _texture_desc_heap->GetCPUDescriptorHandleForHeapStart();
             handle.ptr += group_size() * OBJ_CNT;
             _device->CreateShaderResourceView(buf.Get(), &desc, handle);
         } else if (meta.arraySize == 1) {
@@ -264,7 +258,7 @@ namespace directx_renderer {
 
     void
     dx12_renderer::bind_texture(int obj, const std::string &texture, int regi) {
-        auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
+        auto handle = _texture_desc_heap->GetCPUDescriptorHandleForHeapStart();
         auto handle_sz = _device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         handle.ptr += obj * group_size();
@@ -283,34 +277,35 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::render_begin() {
-        camera_buf cam_buf;
-        cam_buf.position = _main_camera->tr.position;
-        cam_buf.vp = _main_camera->view() * _main_camera->projection();
-        update_const_buffer<camera_buf>(_vp_buffer, &cam_buf, 0);
-
-        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
-            update_const_buffer<skin_matrix>(_skin_metrics_buf,
-                                             &(e->skin_matrices), e->id);
-        }
+//        camera_buf cam_buf;
+//        cam_buf.position = _main_camera->tr.position;
+//        cam_buf.vp = _main_camera->view() * _main_camera->projection();
+//        update_const_buffer<camera_buf>(_vp_buffer, &cam_buf, 0);
+//
+//        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
+//            update_const_buffer<skin_matrix>(_skin_metrics_buf,
+//                                             &(e->skin_matrices), e->id);
+//        }
 
         ThrowIfFailed(_cmd_alloc->Reset())
         ThrowIfFailed(_cmd_list->Reset(_cmd_alloc.Get(), nullptr))
         _cmd_list->SetGraphicsRootSignature(
                 _signatures[shader_type::general].Get());
-        _cmd_list->SetGraphicsRootConstantBufferView(0,
-                                                     _global_buffer->GetGPUVirtualAddress());
-        _cmd_list->SetGraphicsRootConstantBufferView(1,
-                                                     _vp_buffer->GetGPUVirtualAddress());
-        _cmd_list->SetGraphicsRootConstantBufferView(2,
-                                                     _light_buffer->GetGPUVirtualAddress());
-        _cmd_list->SetGraphicsRootShaderResourceView(3,
-                                                     _mat_buffer->GetGPUVirtualAddress());
+        _cmd_list->SetGraphicsRootConstantBufferView(
+                static_cast<uint8_t>(cbuffer::global_scene),
+                _global_scene_buffer->GetGPUVirtualAddress());
 
-        ID3D12DescriptorHeap *heaps[] = {_res_desc_heap.Get()};
+        ID3D12DescriptorHeap *heaps[] = {_texture_desc_heap.Get()};
         _cmd_list->SetDescriptorHeaps(_countof(heaps), heaps);
-        auto skybox_handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
-        skybox_handle.ptr += group_size() * OBJ_CNT;
-        _cmd_list->SetGraphicsRootDescriptorTable(4, skybox_handle);
+        auto tex_handle = _texture_desc_heap->GetGPUDescriptorHandleForHeapStart();
+        _cmd_list->SetGraphicsRootDescriptorTable(4, tex_handle);
+        tex_handle.ptr += _device->GetDescriptorHandleIncrementSize(
+                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) *
+                          static_cast<uint8_t>(tbuffer::object);
+        _cmd_list->SetGraphicsRootDescriptorTable(5, tex_handle);
+
+        _cmd_list->SetGraphicsRootShaderResourceView(6,
+                                                     _mat_buffer->GetGPUVirtualAddress());
 
         {//draw shadow map
             _cmd_list->RSSetViewports(1, &(_shadow_map.viewport));
@@ -347,7 +342,7 @@ namespace directx_renderer {
                                 .5f, .5f, .0f, 1.f};
             _global.light_vp = view * proj;
             _global.shadow_uv_matrix = _global.light_vp * ndc_to_uv;
-            update_const_buffer(_global_buffer, &_global, 0);
+            update_const_buffer(_global_scene_buffer, &_global, 0);
             _cmd_list->SetPipelineState(
                     _pso_list[static_cast<uint8_t>(layer::dynamic_shadow)].Get());
             for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque)]) {
@@ -497,7 +492,7 @@ namespace directx_renderer {
                 ++k;
             }
             _global.reflection_count = mirrors.size();
-            update_const_buffer(_global_buffer, &_global, 0);
+            update_const_buffer(_global_scene_buffer, &_global, 0);
 
 
             _cmd_list->SetPipelineState(
@@ -525,7 +520,7 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::render(const render_info &info) {
-        auto handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
+        auto handle = _texture_desc_heap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += group_size() * info.object_index;
         _cmd_list->SetGraphicsRootDescriptorTable(4, handle);
 
@@ -534,7 +529,7 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::render(const std::shared_ptr<renderee> &r) {
-        auto handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
+        auto handle = _texture_desc_heap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += group_size() * r->id;
         _cmd_list->SetGraphicsRootDescriptorTable(5, handle);
 
@@ -685,59 +680,52 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::init_global_buf() {
-        _global_buffer = create_const_buffer<global>(1, _device);
+        _global_scene_buffer = create_const_buffer<global>(1, _device);
         auto plane = Plane(Vector3(0.f, 0.001f, 0.f), Vector3::Up);
         auto n = Vector4(0.f, -1.f, 1.f, 0.f);
         n.Normalize();
         n = -n;
         _global.shadow_matrix = DirectX::XMMatrixShadow(plane, n);
-        update_const_buffer(_global_buffer, &_global, 0);
-    }
-
-    void dx12_renderer::init_camera_buf() {
-        _vp_buffer = create_const_buffer<camera_buf>(1, _device);
-    }
-
-    void dx12_renderer::init_light_buf() {
-        _light_buffer = create_const_buffer<light_info>(2, _device);
+        update_const_buffer(_global_scene_buffer, &_global, 0);
     }
 
     void dx12_renderer::init_resources() {
-        _obj_const_buffer = create_const_buffer<object_constant>(OBJ_CNT,
-                                                                 _device);
-        _skin_metrics_buf = create_const_buffer<skin_matrix>(OBJ_CNT, _device);
+        frame_resource_buffer::buffer_sizes s = {3, OBJ_CNT, 3};
+        _frame_resource_buffer = std::make_unique<frame_resource_buffer>(
+                _device, s);
         _mat_buffer = create_upload_buffer(OBJ_CNT, sizeof(material), _device);
-
-        D3D12_DESCRIPTOR_HEAP_DESC h_desc = {};
-        h_desc.NodeMask = 0;
-        h_desc.NumDescriptors = OBJ_CNT * TABLE_SIZE + 2;//1 is for cube map;
-        h_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-        h_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        _device->CreateDescriptorHeap(&h_desc, IID_PPV_ARGS(&_res_desc_heap));
-
-        for (auto i = 0; i < OBJ_CNT; ++i) {
-            D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
-            cbv_desc.SizeInBytes = size_of_256<object_constant>();
-            cbv_desc.BufferLocation =
-                    _obj_const_buffer->GetGPUVirtualAddress() +
-                    size_of_256<object_constant>() * i;
-            auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
-            handle.ptr += group_size() * i;
-            _device->CreateConstantBufferView(&cbv_desc, handle);
-        }
-
-        for (auto i = 0; i < OBJ_CNT; ++i) {
-            D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
-            cbv_desc.SizeInBytes = size_of_256<skin_matrix>();
-            cbv_desc.BufferLocation =
-                    _skin_metrics_buf->GetGPUVirtualAddress() +
-                    size_of_256<skin_matrix>() * i;
-            auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
-            handle.ptr += group_size() * i +
-                          _device->GetDescriptorHandleIncrementSize(
-                                  D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-            _device->CreateConstantBufferView(&cbv_desc, handle);
-        }
+//
+//        D3D12_DESCRIPTOR_HEAP_DESC h_desc = {};
+//        h_desc.NodeMask = 0;
+//        h_desc.NumDescriptors = OBJ_CNT * TABLE_SIZE + 2;//1 is for cube map;
+//        h_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+//        h_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+//        _device->CreateDescriptorHeap(&h_desc,
+//                                      IID_PPV_ARGS(&_texture_desc_heap));
+//
+//        for (auto i = 0; i < OBJ_CNT; ++i) {
+//            D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
+//            cbv_desc.SizeInBytes = size_of_256<object_constant>();
+//            cbv_desc.BufferLocation =
+//                    _obj_const_buffer->GetGPUVirtualAddress() +
+//                    size_of_256<object_constant>() * i;
+//            auto handle = _texture_desc_heap->GetCPUDescriptorHandleForHeapStart();
+//            handle.ptr += group_size() * i;
+//            _device->CreateConstantBufferView(&cbv_desc, handle);
+//        }
+//
+//        for (auto i = 0; i < OBJ_CNT; ++i) {
+//            D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
+//            cbv_desc.SizeInBytes = size_of_256<skin_matrix>();
+//            cbv_desc.BufferLocation =
+//                    _skin_metrics_buf->GetGPUVirtualAddress() +
+//                    size_of_256<skin_matrix>() * i;
+//            auto handle = _texture_desc_heap->GetCPUDescriptorHandleForHeapStart();
+//            handle.ptr += group_size() * i +
+//                          _device->GetDescriptorHandleIncrementSize(
+//                                  D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+//            _device->CreateConstantBufferView(&cbv_desc, handle);
+//        }
     }
 
     void dx12_renderer::init_root_signature() {
@@ -818,23 +806,36 @@ namespace directx_renderer {
                                                    IID_PPV_ARGS(
                                                            &_signatures[shader_type::blur])));
     }
+
     void dx12_renderer::init_default_signature() {
-        CD3DX12_DESCRIPTOR_RANGE t0[] = {
-                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0),
+        const static int g_texture_cnt = 2;
+
+        CD3DX12_DESCRIPTOR_RANGE global_textures[] = {
+                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+                                         static_cast<uint8_t>(tbuffer::object),
+                                         0),
         };
 
-        CD3DX12_DESCRIPTOR_RANGE t1[] = {
-                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 2, 3),
-                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 2)
+        CD3DX12_DESCRIPTOR_RANGE object_textures[] = {
+                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV,
+                                         MAX_TEX_CNT,
+                                         static_cast<uint8_t>(tbuffer::object)),
         };
 
-        CD3DX12_ROOT_PARAMETER param[6];
-        param[0].InitAsConstantBufferView(0);//global
-        param[1].InitAsConstantBufferView(1);//camera
-        param[2].InitAsConstantBufferView(2);//lights
-        param[3].InitAsShaderResourceView(0, 1);//mats
-        param[4].InitAsDescriptorTable(_countof(t0), t0);//skybox, shadow
-        param[5].InitAsDescriptorTable(_countof(t1), t1);//object const
+        CD3DX12_ROOT_PARAMETER param[7];
+        param[0].InitAsConstantBufferView(
+                static_cast<uint8_t>(cbuffer::global_scene));
+        param[1].InitAsConstantBufferView(
+                static_cast<uint8_t>(cbuffer::global_frame));
+        param[2].InitAsConstantBufferView(
+                static_cast<uint8_t>(cbuffer::object));
+        param[3].InitAsConstantBufferView(
+                static_cast<uint8_t>(cbuffer::final_matrices));
+        param[4].InitAsDescriptorTable(_countof(global_textures),
+                                       global_textures);
+        param[5].InitAsDescriptorTable(_countof(object_textures),
+                                       object_textures);
+        param[6].InitAsShaderResourceView(0, 1);//mats
 
         auto sampler_arr = sampler::samplers();
 
@@ -1036,7 +1037,7 @@ namespace directx_renderer {
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE dx12_renderer::shadow_handle() {
-        auto ret = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
+        auto ret = _texture_desc_heap->GetCPUDescriptorHandleForHeapStart();
         ret.ptr += OBJ_CNT * group_size();
         ret.ptr += _device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);

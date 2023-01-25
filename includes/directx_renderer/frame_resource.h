@@ -30,6 +30,7 @@ namespace directx_renderer {
                  const std::vector<skin_matrix> &, UINT64 fence);
 
         frame_resource get();
+        frame_resource peek();
 
     private:
         std::vector<frame_resource> _frame_resources;

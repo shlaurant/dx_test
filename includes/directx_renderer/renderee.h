@@ -21,10 +21,8 @@ namespace directx_renderer {
         renderee_type type;
         std::string name;
         std::string geometry;
-        std::string texture[2] = {"", ""};
         std::string material;
-        transform tr;
-        skin_matrix skin_matrices;
+        int skin_matrix;
 
     private:
         int id;

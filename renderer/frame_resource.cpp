@@ -52,4 +52,8 @@ namespace directx_renderer {
         _read = next_of(_read);
         return ret;
     }
+
+    frame_resource frame_resource_buffer::peek() {
+        return _frame_resources[_read];
+    }
 }

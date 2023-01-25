@@ -28,6 +28,7 @@ namespace directx_renderer {
     public:
         const static int SWAP_CHAIN_BUFFER_COUNT = 2;
         const static int OBJ_CNT = 20;
+        const static int MAX_TEX_CNT = 64;// Should be same with the one in register.hlsl
 
         void init(const window_info &);
 
@@ -94,8 +95,8 @@ namespace directx_renderer {
         void update_frame_resource(const global_frame &gf,
                                    const std::vector<object_constant> &ocv,
                                    const std::vector<skin_matrix> &smv);
-        void update_camera(const camera_buf &);
-        void update_lights(const light_info &);
+//        void update_camera(const camera_buf &);
+//        void update_lights(const light_info &);
 
         void init_renderees(std::vector<std::shared_ptr<renderee>>);
         void render();
@@ -124,6 +125,19 @@ namespace directx_renderer {
 
         enum class shader_type {
             general, blur, terrain, shadow
+        };
+
+        enum class cbuffer:uint8_t {
+            global_scene = 0,
+            global_frame,
+            object,
+            final_matrices
+        };
+
+        enum class tbuffer:uint8_t {
+            cube = 0,
+            shadow,
+            object
         };
 
         ComPtr<IDXGIFactory> _factory;
@@ -160,25 +174,19 @@ namespace directx_renderer {
         //resource
         static const int TABLE_SIZE = 4;
 
-        std::unique_ptr<frame_resource_buffer> _frame_resource_buffer;
         std::unordered_map<uint32_t, std::unordered_map<std::string, geo_info>> _geo_infos;
         std::unordered_map<uint32_t, std::pair<ComPtr<
                 ID3D12Resource>, D3D12_VERTEX_BUFFER_VIEW>> _vertex_buffers;
         std::unordered_map<uint32_t, std::pair<ComPtr<
                 ID3D12Resource>, D3D12_INDEX_BUFFER_VIEW>> _index_buffers;
         global _global;
-        ComPtr<ID3D12Resource> _global_buffer;//globals set automatically.
-        ComPtr<ID3D12Resource> _vp_buffer;
-        ComPtr<ID3D12Resource> _light_buffer;
-        ComPtr<ID3D12Resource> _obj_const_buffer;
-        ComPtr<ID3D12Resource> _skin_metrics_buf;
+        ComPtr<ID3D12Resource> _global_scene_buffer;//globals set automatically.
+        std::unique_ptr<frame_resource_buffer> _frame_resource_buffer;
         ComPtr<ID3D12Resource> _mat_buffer;
         std::unordered_map<std::string, int> _mat_ids;
         std::unordered_map<std::string, std::pair<D3D12_SHADER_RESOURCE_VIEW_DESC,
                 ComPtr<ID3D12Resource>>> _textures;
-        ComPtr<ID3D12DescriptorHeap> _res_desc_heap;
-        ComPtr<ID3D12Resource> _env_map_buffer;
-        ComPtr<ID3D12DescriptorHeap> _env_desc_heap;
+        ComPtr<ID3D12DescriptorHeap> _texture_desc_heap;
 
 
         //shader

@@ -4,7 +4,7 @@
 #define MAX_TEX_CNT 64
 #define MAX_BONE_CNT 256
 
-cbuffer globals :register(b0) {
+cbuffer globals_scene :register(b0) {
     row_major float4x4 reflection_matrix[10];
     int reflection_count;
     float3 pad0;
