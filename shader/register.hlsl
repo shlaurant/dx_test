@@ -3,34 +3,29 @@
 
 #define MAX_BONE_CNT 256
 
-cbuffer globals :register(b0) {
+cbuffer globals_scene :register(b0) {
     row_major float4x4 reflection_matrix[10];
     int reflection_count;
     float3 pad0;
     row_major float4x4 shadow_matrix;
+};
+
+cbuffer globals_frame :register(b1) {
+    row_major float4x4 vp;
+    float3 camera_pos;
+    int active_light_counts;
+    light lights[LIGHT_COUNT];
     row_major float4x4 light_vp;
     row_major float4x4 shadow_uv_matrix;
 };
 
-cbuffer camera :register(b1) {
-    row_major float4x4 vp;
-    float3 camera_pos;
-    float camera_pad0;
-};
-
-cbuffer light_info : register(b2) {
-    light lights[LIGHT_COUNT];
-    int active_light_counts;
-    float3 light_info_pad0;
-};
-
-cbuffer object_const :register(b3) {
+cbuffer object_const :register(b2) {
     float3 obj_position;
     int obj_pad0;
     row_major float4x4 w;
 };
 
-cbuffer bone_matrix : register(b4) {
+cbuffer bone_matrix : register(b3) {
     row_major float4x4 final_matrices[MAX_BONE_CNT];
 }
 
