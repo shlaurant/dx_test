@@ -131,4 +131,13 @@ namespace directx_renderer {
     struct skin_matrix {
         DirectX::SimpleMath::Matrix matrices[256];
     };
+
+    struct frame_globals {
+        DirectX::SimpleMath::Matrix camera_vp;
+        DirectX::SimpleMath::Vector3 camera_position;
+        int light_count;
+        light lights[50];//should be same with LIGHT_COUNT in shader code
+        DirectX::SimpleMath::Matrix light_vp;
+        DirectX::SimpleMath::Matrix shadow_uv;
+    };
 }

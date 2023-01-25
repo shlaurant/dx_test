@@ -23,8 +23,6 @@ namespace directx_renderer {
         init_dsv(info);
 
         init_global_buf();
-        init_camera_buf();
-        init_light_buf();
         init_resources();
         _blur.init(_device, info.width, info.height);
         _shadow_map.init(_device, info.width, info.height, shadow_handle());
@@ -42,12 +40,8 @@ namespace directx_renderer {
         _main_camera = std::move(p);
     }
 
-    void dx12_renderer::update_camera(const camera_buf &cam) {
-        update_const_buffer<camera_buf>(_vp_buffer, &cam, 0);
-    }
-
-    void dx12_renderer::update_lights(const light_info &info) {
-        update_const_buffer<light_info>(_light_buffer, &info, 0);
+    void dx12_renderer::update_frame(const frame_globals &d) {
+        update_const_buffer<frame_globals>(_frame_globals_buffer, &d, 0);
     }
 
     void
@@ -270,11 +264,6 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::render_begin() {
-        camera_buf cam_buf;
-        cam_buf.position = _main_camera->tr.position;
-        cam_buf.vp = _main_camera->view() * _main_camera->projection();
-        update_const_buffer<camera_buf>(_vp_buffer, &cam_buf, 0);
-
         for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
             update_const_buffer<skin_matrix>(_skin_metrics_buf,
                                              &(e->skin_matrices), e->id);
@@ -284,20 +273,18 @@ namespace directx_renderer {
         ThrowIfFailed(_cmd_list->Reset(_cmd_alloc.Get(), nullptr))
         _cmd_list->SetGraphicsRootSignature(
                 _signatures[shader_type::general].Get());
-        _cmd_list->SetGraphicsRootConstantBufferView(0,
+        _cmd_list->SetGraphicsRootConstantBufferView(static_cast<uint8_t>(root_param::g_scene),
                                                      _global_buffer->GetGPUVirtualAddress());
-        _cmd_list->SetGraphicsRootConstantBufferView(1,
-                                                     _vp_buffer->GetGPUVirtualAddress());
-        _cmd_list->SetGraphicsRootConstantBufferView(2,
-                                                     _light_buffer->GetGPUVirtualAddress());
-        _cmd_list->SetGraphicsRootShaderResourceView(3,
+        _cmd_list->SetGraphicsRootConstantBufferView(static_cast<uint8_t>(root_param::g_frame),
+                                                     _frame_globals_buffer->GetGPUVirtualAddress());
+        _cmd_list->SetGraphicsRootShaderResourceView(static_cast<uint8_t>(root_param::material),
                                                      _mat_buffer->GetGPUVirtualAddress());
 
         ID3D12DescriptorHeap *heaps[] = {_res_desc_heap.Get()};
         _cmd_list->SetDescriptorHeaps(_countof(heaps), heaps);
         auto skybox_handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
         skybox_handle.ptr += group_size() * OBJ_CNT;
-        _cmd_list->SetGraphicsRootDescriptorTable(4, skybox_handle);
+        _cmd_list->SetGraphicsRootDescriptorTable(static_cast<uint8_t>(root_param::g_texture), skybox_handle);
 
         {//draw shadow map
             _cmd_list->RSSetViewports(1, &(_shadow_map.viewport));
@@ -320,21 +307,7 @@ namespace directx_renderer {
             _cmd_list->IASetIndexBuffer(
                     &(_index_buffers[type_id<vertex>()].second));
             _cmd_list->OMSetRenderTargets(0, nullptr, false, &dsv);
-            Vector3 center = Vector3::Zero;
-            Vector3 light_vec = Vector3(0.f, -1.f, 1.f);
-            light_vec.Normalize();
-            camera light_cam;
-            light_cam.tr.position = center + (-light_vec * 2) * 10.f;
-            light_cam.tr.rotation.x = DirectX::XM_PI / 4.f;
-            auto view = light_cam.view();
-            auto proj = DirectX::XMMatrixOrthographicLH(80.f, 80.f, 1.f, 100.f);
-            Matrix ndc_to_uv = {.5f, .0f, .0f, .0f,
-                                .0f, -.5f, .0f, .0f,
-                                .0f, .0f, 1.f, 0.f,
-                                .5f, .5f, .0f, 1.f};
-            _global.light_vp = view * proj;
-            _global.shadow_uv_matrix = _global.light_vp * ndc_to_uv;
-            update_const_buffer(_global_buffer, &_global, 0);
+
             _cmd_list->SetPipelineState(
                     _pso_list[static_cast<uint8_t>(layer::dynamic_shadow)].Get());
             for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque)]) {
@@ -522,7 +495,7 @@ namespace directx_renderer {
     void dx12_renderer::render(const std::shared_ptr<renderee> &r) {
         auto handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += group_size() * r->id;
-        _cmd_list->SetGraphicsRootDescriptorTable(5, handle);
+        _cmd_list->SetGraphicsRootDescriptorTable(static_cast<uint8_t>(root_param::obj_const), handle);
 
         _cmd_list->DrawIndexedInstanced(r->geo.index_count, 1,
                                         r->geo.index_offset,
@@ -680,15 +653,8 @@ namespace directx_renderer {
         update_const_buffer(_global_buffer, &_global, 0);
     }
 
-    void dx12_renderer::init_camera_buf() {
-        _vp_buffer = create_const_buffer<camera_buf>(1, _device);
-    }
-
-    void dx12_renderer::init_light_buf() {
-        _light_buffer = create_const_buffer<light_info>(2, _device);
-    }
-
     void dx12_renderer::init_resources() {
+        _frame_globals_buffer = create_const_buffer<frame_globals>(1, _device);
         _obj_const_buffer = create_const_buffer<object_constant>(OBJ_CNT,
                                                                  _device);
         _skin_metrics_buf = create_const_buffer<skin_matrix>(OBJ_CNT, _device);
@@ -810,17 +776,16 @@ namespace directx_renderer {
         };
 
         CD3DX12_DESCRIPTOR_RANGE t1[] = {
-                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 2, 3),
+                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 2, 2),
                 CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 2)
         };
 
-        CD3DX12_ROOT_PARAMETER param[6];
-        param[0].InitAsConstantBufferView(0);//global
-        param[1].InitAsConstantBufferView(1);//camera
-        param[2].InitAsConstantBufferView(2);//lights
-        param[3].InitAsShaderResourceView(0, 1);//mats
-        param[4].InitAsDescriptorTable(_countof(t0), t0);//skybox, shadow
-        param[5].InitAsDescriptorTable(_countof(t1), t1);//object const
+        CD3DX12_ROOT_PARAMETER param[5];
+        param[static_cast<uint8_t>(root_param::g_scene)].InitAsConstantBufferView(0);//global_scene
+        param[static_cast<uint8_t>(root_param::g_frame)].InitAsConstantBufferView(1);//global_frame
+        param[static_cast<uint8_t>(root_param::material)].InitAsShaderResourceView(0, 1);//mats
+        param[static_cast<uint8_t>(root_param::g_texture)].InitAsDescriptorTable(_countof(t0), t0);//skybox, shadow
+        param[static_cast<uint8_t>(root_param::obj_const)].InitAsDescriptorTable(_countof(t1), t1);//object const
 
         auto sampler_arr = sampler::samplers();
 

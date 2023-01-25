@@ -15,7 +15,8 @@ FBXLoader dragon_fbx;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-std::vector<directx_renderer::geometry<directx_renderer::vertex>> create_geometries();
+std::vector<directx_renderer::geometry<directx_renderer::vertex>>
+create_geometries();
 directx_renderer::light_info create_light_info();
 
 std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees();
@@ -69,14 +70,16 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
 
         dx12.init({hwnd, 1920, 1080, true});
         auto li = create_light_info();
-        dragon_fbx.LoadFbx(L"resource\\Dragon.fbx", "dragon");
+
+//        dragon_fbx.LoadFbx(L"resource\\Dragon.fbx", "dragon");
+//        animator anim;
+//        anim.init(dragon_fbx.GetAnimClip()[0], dragon_fbx.GetBones());
+//        anim.final_matrices_after(0.f, renderees.back()->skin_matrices);
+
         load_geometries(dx12);
         load_textures(dx12);
         load_materials(dx12);
         std::vector<std::shared_ptr<directx_renderer::renderee>> renderees = build_renderees();
-        animator anim;
-        anim.init(dragon_fbx.GetAnimClip()[0], dragon_fbx.GetBones());
-        anim.final_matrices_after(0.f, renderees.back()->skin_matrices);
         dx12.init_renderees(renderees);
         std::shared_ptr<directx_renderer::camera> camera = std::make_shared<directx_renderer::camera>();
         camera->tr.rotation.x = DirectX::XM_PI / 4.f;
@@ -84,21 +87,48 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         camera->tr.position.y = 5.f;
         dx12.set_main_camera(camera);
 
+        directx_renderer::frame_globals fg;
+        fg.light_count = li.active_count;
+        for (auto i = 0; i < 50; ++i) {
+            fg.lights[i] = li.lights[i];
+        }
+
         timer.Start();
         while (msg.message != WM_QUIT) {
             if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             } else {
-                timer.Tick();
-                std::wstring txt = L"fps: ";
-                txt += std::to_wstring(1 / timer.DeltaTime());
+                {//update
+                    timer.Tick();
+                    std::wstring txt = L"fps: ";
+                    txt += std::to_wstring(1 / timer.DeltaTime());
+                    SetWindowText(hwnd, txt.c_str());
+                    input.Update();
+//                    anim.final_matrices_after(timer.DeltaTime(),renderees.back()->skin_matrices);
+                    handle_input(input, camera, timer);
+                    fg.camera_position = camera->tr.position;
+                    fg.camera_vp = camera->view() * camera->projection();
 
-                SetWindowText(hwnd, txt.c_str());
-                input.Update();
-                anim.final_matrices_after(timer.DeltaTime(), renderees.back()->skin_matrices);
-                handle_input(input, camera, timer);
-                dx12.update_lights(li);
+                    Vector3 center = Vector3::Zero;
+                    Vector3 light_vec = Vector3(0.f, -1.f, 1.f);
+                    light_vec.Normalize();
+                    directx_renderer::camera light_cam;
+                    light_cam.tr.position = center + (-light_vec * 2) * 10.f;
+                    light_cam.tr.rotation.x = DirectX::XM_PI / 4.f;
+                    auto view = light_cam.view();
+                    auto proj = DirectX::XMMatrixOrthographicLH(80.f, 80.f, 1.f, 100.f);
+                    Matrix ndc_to_uv = {.5f, .0f, .0f, .0f,
+                                        .0f, -.5f, .0f, .0f,
+                                        .0f, .0f, 1.f, 0.f,
+                                        .5f, .5f, .0f, 1.f};
+
+                    fg.light_vp = view * proj;
+                    fg.shadow_uv = fg.light_vp * ndc_to_uv;
+
+                    dx12.update_frame(fg);
+                }
+
                 dx12.render_begin();
                 dx12.render();
                 dx12.render_end();
@@ -150,7 +180,7 @@ void load_geometries(directx_renderer::dx12_renderer &dx12) {
     std::vector<directx_renderer::geometry<directx_renderer::vertex_billboard>> geo1;
     geo1.resize(1);
     directx_renderer::vertex_billboard v{Vector3(0.0f, 0.0f, 0.f),
-                                      Vector2(1.f, 1.f)};
+                                         Vector2(1.f, 1.f)};
     geo1[0].name = "billboard";
     geo1[0].vertices = {{Vector3(0.0f, 0.0f, 0.f), Vector2(1.f, 1.f)},
                         {Vector3(1.0f, 0.0f, 0.f), Vector2(1.5f, 1.5f)},
@@ -282,7 +312,7 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         dragon->material = "rough";
         dragon->tr.position = Vector3(0.f, 6.f, -5.f);
         dragon->tr.scale = Vector3(0.25f, 0.25f, 0.25f);
-        renderees.emplace_back(dragon);
+//        renderees.emplace_back(dragon);
     }
 
     return renderees;
@@ -350,9 +380,9 @@ create_geometries() {
 //        ret.emplace_back(e);
 //    }
 
-    for (const auto &e: dragon_fbx.geometries()) {
-        ret.emplace_back(e);
-    }
+//    for (const auto &e: dragon_fbx.geometries()) {
+//        ret.emplace_back(e);
+//    }
 
     return std::move(ret);
 }

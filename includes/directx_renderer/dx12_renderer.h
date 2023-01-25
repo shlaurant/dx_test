@@ -90,8 +90,7 @@ namespace directx_renderer {
         void load_material(const std::vector<std::string> &names, const std::vector<material> &mat);
         void set_main_camera(std::shared_ptr<camera>);
 
-        void update_camera(const camera_buf &);
-        void update_lights(const light_info &);
+        void update_frame(const frame_globals &);
 
         void init_renderees(std::vector<std::shared_ptr<renderee>>);
         void render();
@@ -102,6 +101,10 @@ namespace directx_renderer {
         void render_end();
 
     private:
+        enum class root_param : uint8_t {
+            g_scene, g_frame, material, g_texture, obj_const
+        };
+
         enum class layer : uint8_t {
             opaque,
             transparent,
@@ -163,6 +166,7 @@ namespace directx_renderer {
                 ID3D12Resource>, D3D12_INDEX_BUFFER_VIEW>> _index_buffers;
         global _global;
         ComPtr<ID3D12Resource> _global_buffer;//globals set automatically.
+        ComPtr<ID3D12Resource> _frame_globals_buffer;
         ComPtr<ID3D12Resource> _vp_buffer;
         ComPtr<ID3D12Resource> _light_buffer;
         ComPtr<ID3D12Resource> _obj_const_buffer;
@@ -172,8 +176,6 @@ namespace directx_renderer {
         std::unordered_map<std::string, std::pair<D3D12_SHADER_RESOURCE_VIEW_DESC,
                 ComPtr<ID3D12Resource>>> _textures;
         ComPtr<ID3D12DescriptorHeap> _res_desc_heap;
-        ComPtr<ID3D12Resource> _env_map_buffer;
-        ComPtr<ID3D12DescriptorHeap> _env_desc_heap;
 
 
         //shader
@@ -194,8 +196,6 @@ namespace directx_renderer {
         void init_dsv(const window_info &);
 
         void init_global_buf();
-        void init_camera_buf();
-        void init_light_buf();
         void init_resources();
         void bind_texture(int obj, const std::string &texture, int regi);
 
