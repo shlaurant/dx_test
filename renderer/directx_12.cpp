@@ -36,10 +36,6 @@ namespace directx_renderer {
         SetWindowPos(info.hwnd, 0, 100, 100, info.width, info.height, 0);
     }
 
-    void dx12_renderer::set_main_camera(std::shared_ptr<camera> p) {
-        _main_camera = std::move(p);
-    }
-
     void dx12_renderer::update_frame(const frame_globals &d) {
         update_const_buffer<frame_globals>(_frame_globals_buffer, &d, 0);
     }

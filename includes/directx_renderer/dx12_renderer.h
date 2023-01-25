@@ -88,7 +88,6 @@ namespace directx_renderer {
         }
         void load_texture(const std::string &name, const std::wstring &path);
         void load_material(const std::vector<std::string> &names, const std::vector<material> &mat);
-        void set_main_camera(std::shared_ptr<camera>);
 
         void update_frame(const frame_globals &);
 
@@ -167,8 +166,7 @@ namespace directx_renderer {
         global _global;
         ComPtr<ID3D12Resource> _global_buffer;//globals set automatically.
         ComPtr<ID3D12Resource> _frame_globals_buffer;
-        ComPtr<ID3D12Resource> _vp_buffer;
-        ComPtr<ID3D12Resource> _light_buffer;
+
         ComPtr<ID3D12Resource> _obj_const_buffer;
         ComPtr<ID3D12Resource> _skin_metrics_buf;
         ComPtr<ID3D12Resource> _mat_buffer;
@@ -187,7 +185,6 @@ namespace directx_renderer {
 
         //user modifiable
         std::vector<std::vector<std::shared_ptr<renderee>>> _renderees;
-        std::shared_ptr<camera> _main_camera;
 
         void init_base(const window_info &info);
         void init_cmds();

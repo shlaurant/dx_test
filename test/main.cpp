@@ -85,7 +85,6 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         camera->tr.rotation.x = DirectX::XM_PI / 4.f;
         camera->tr.position.z = -2.f;
         camera->tr.position.y = 5.f;
-        dx12.set_main_camera(camera);
 
         directx_renderer::frame_globals fg;
         fg.light_count = li.active_count;
