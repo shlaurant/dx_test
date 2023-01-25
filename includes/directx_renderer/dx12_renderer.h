@@ -12,6 +12,7 @@
 #include "blur.h"
 #include "renderee.h"
 #include "shadow_map.h"
+#include "frame_resource.h"
 
 using namespace Microsoft::WRL;
 
@@ -90,6 +91,9 @@ namespace directx_renderer {
         void load_material(const std::vector<std::string> &names, const std::vector<material> &mat);
         void set_main_camera(std::shared_ptr<camera>);
 
+        void update_frame_resource(const global_frame &gf,
+                                   const std::vector<object_constant> &ocv,
+                                   const std::vector<skin_matrix> &smv);
         void update_camera(const camera_buf &);
         void update_lights(const light_info &);
 
@@ -156,6 +160,7 @@ namespace directx_renderer {
         //resource
         static const int TABLE_SIZE = 4;
 
+        std::unique_ptr<frame_resource_buffer> _frame_resource_buffer;
         std::unordered_map<uint32_t, std::unordered_map<std::string, geo_info>> _geo_infos;
         std::unordered_map<uint32_t, std::pair<ComPtr<
                 ID3D12Resource>, D3D12_VERTEX_BUFFER_VIEW>> _vertex_buffers;

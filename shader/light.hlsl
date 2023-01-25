@@ -7,6 +7,10 @@ struct material {
     float4 diffuse_albedo;
     float3 fresnel_r0;
     float roughness;
+    uint texture_diffuse;
+    uint texture_normal;
+    float pad0;
+    float pad1;
 };
 
 struct light {

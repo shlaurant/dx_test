@@ -42,6 +42,19 @@ namespace directx_renderer {
         _main_camera = std::move(p);
     }
 
+    void dx12_renderer::update_frame_resource(const global_frame &gf,
+                                              const std::vector<object_constant> &ocv,
+                                              const std::vector<skin_matrix> &smv) {
+        if(_frame_resource_buffer->is_waiting(_fence->GetCompletedValue())){
+            auto handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+            ThrowIfFailed(_fence->SetEventOnCompletion(_frame_resource_buffer->fence_in_wait(), handle));
+            WaitForSingleObject(handle, INFINITE);
+            CloseHandle(handle);
+        }
+
+        _frame_resource_buffer->put(gf, ocv, smv, ++_fence_value);
+    }
+
     void dx12_renderer::update_camera(const camera_buf &cam) {
         update_const_buffer<camera_buf>(_vp_buffer, &cam, 0);
     }
@@ -406,6 +419,7 @@ namespace directx_renderer {
         execute_cmd_list();
         _swap_chain->Present(0, 0);
         _back_buffer = (_back_buffer + 1) % SWAP_CHAIN_BUFFER_COUNT;
+
 
         wait_cmd_queue_sync();
     }

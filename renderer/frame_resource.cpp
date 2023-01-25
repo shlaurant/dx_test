@@ -6,7 +6,6 @@ namespace directx_renderer {
             Microsoft::WRL::ComPtr<ID3D12Device> device,
             const frame_resource_buffer::buffer_sizes &size) : _frame_resources(
             std::vector<frame_resource>(size.buf_cnt)) {
-        _size = size.buf_cnt;
 
         for (auto i = 0; i < size.buf_cnt; ++i) {
             _frame_resources[i].global = create_const_buffer<global_frame>(1,
@@ -18,13 +17,19 @@ namespace directx_renderer {
         }
     }
 
-    bool frame_resource_buffer::has_room() const {
-        return next_of(_write) != _read;
+    bool frame_resource_buffer::is_waiting(UINT64 last_comp_fence) {
+        return _frame_resources[_write].fence == 0 &&
+               _frame_resources[_write].fence > last_comp_fence;
+    }
+
+    UINT64 frame_resource_buffer::fence_in_wait() {
+        return _frame_resources[_write].fence;
     }
 
     void frame_resource_buffer::put(const global_frame &gf,
                                     const std::vector<object_constant> &ocv,
-                                    const std::vector<skin_matrix> &smv) {
+                                    const std::vector<skin_matrix> &smv,
+                                    UINT64 fence) {
         update_const_buffer<global_frame>(_frame_resources[_write].global, &gf,
                                           0);
         for (auto i = 0; i < ocv.size(); ++i) {
@@ -37,11 +42,9 @@ namespace directx_renderer {
                     (_frame_resources[_write].final_matrices, &(smv[i]), i);
         }
 
-        _write = next_of(_write);
-    }
+        _frame_resources[_write].fence = fence;
 
-    frame_resource frame_resource_buffer::peek() const {
-        return _frame_resources[_read];
+        _write = next_of(_write);
     }
 
     frame_resource frame_resource_buffer::get() {
