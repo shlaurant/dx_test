@@ -24,6 +24,8 @@ namespace directx_renderer {
         bool windowed;
     };
 
+    const uint32_t OPTION_BLUR = 1 << 0;
+
     class dx12_renderer {
     public:
         const static int OBJ_CNT = 20;
@@ -94,7 +96,7 @@ namespace directx_renderer {
                           const std::vector<object_constant> &,
                           const std::vector<skin_matrix> &);
 
-        void render();
+        void render(uint32_t option = 0);
 
     private:
         enum class root_param : uint8_t {
@@ -198,7 +200,7 @@ namespace directx_renderer {
         void wait_cmd_queue_sync();
 
         void render_begin();
-        void render_end();
+        void render_end(uint32_t option);
         void render(const std::shared_ptr<renderee> &);
 
         UINT group_size();

@@ -102,7 +102,7 @@ namespace directx_renderer {
         }
     }
 
-    void dx12_renderer::render() {
+    void dx12_renderer::render(uint32_t option) {
         render_begin();
 
         _cmd_list->IASetVertexBuffers(0, 1,
@@ -161,7 +161,7 @@ namespace directx_renderer {
             render(e);
         }
 
-        render_end();
+        render_end(option);
     }
 
     void dx12_renderer::load_texture(const std::string &name,
@@ -350,7 +350,7 @@ namespace directx_renderer {
                                       &_dsv_handle);
     }
 
-    void dx12_renderer::render_end() {
+    void dx12_renderer::render_end(uint32_t option) {
         auto barrier1 = CD3DX12_RESOURCE_BARRIER::Transition(
                 _msaa_render_buffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET,
                 D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
@@ -360,10 +360,12 @@ namespace directx_renderer {
                                       _msaa_render_buffer.Get(), 0,
                                       RTV_FORMAT);
 
-//        _blur.blur_texture(_cmd_list, _rtv_buffer[_back_buffer],
-//                           _pso_list[static_cast<uint8_t>(layer::blur_h)],
-//                           _pso_list[static_cast<uint8_t>(layer::blur_v)],
-//                           _signatures[shader_type::blur]);
+        if (option & OPTION_BLUR) {
+            _blur.blur_texture(_cmd_list, _rtv_buffer[_back_buffer],
+                               _pso_list[static_cast<uint8_t>(layer::blur_h)],
+                               _pso_list[static_cast<uint8_t>(layer::blur_v)],
+                               _signatures[shader_type::blur]);
+        }
 
         auto barrier0 = CD3DX12_RESOURCE_BARRIER::Transition(
                 _rtv_buffer[_back_buffer].Get(),
@@ -560,7 +562,9 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::init_resources() {
-        _fres_buffer = std::make_unique<frame_resource_buffer>(_device, FRAME_RESOURCE_BUFFER_SIZE, OBJ_CNT);
+        _fres_buffer = std::make_unique<frame_resource_buffer>(_device,
+                                                               FRAME_RESOURCE_BUFFER_SIZE,
+                                                               OBJ_CNT);
         _mat_buffer = create_upload_buffer(OBJ_CNT, sizeof(material), _device);
 
         D3D12_DESCRIPTOR_HEAP_DESC h_desc = {};
