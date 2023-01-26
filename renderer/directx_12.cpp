@@ -40,6 +40,21 @@ namespace directx_renderer {
         update_const_buffer<frame_globals>(_frame_globals_buffer, &d, 0);
     }
 
+    void dx12_renderer::update_frame(const frame_globals &fg,
+                                     const std::vector<object_constant> &ocv,
+                                     const std::vector<skin_matrix> &smv) {
+        if (!_fres_buffer->can_put(_fence->GetCompletedValue())) {
+            auto fence_event = CreateEventEx(nullptr, nullptr, false,
+                                             EVENT_ALL_ACCESS);
+            _fence->SetEventOnCompletion(_fres_buffer->cur_fence(),
+                                         fence_event);
+            WaitForSingleObject(fence_event, INFINITE);
+            CloseHandle(fence_event);
+        }
+
+        _fres_buffer->put(fg, ocv, smv, ++_fence_value);
+    }
+
     void
     dx12_renderer::init_renderees(std::vector<std::shared_ptr<renderee>> vec) {
         _renderees.clear();
@@ -183,9 +198,8 @@ namespace directx_renderer {
             desc.TextureCube.MipLevels = meta.mipLevels;
             desc.TextureCube.MostDetailedMip = 0;
 
-            auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
-            handle.ptr += group_size() * OBJ_CNT;
-            _device->CreateShaderResourceView(buf.Get(), &desc, handle);
+            _device->CreateShaderResourceView(buf.Get(), &desc,
+                                              _res_desc_heap->GetCPUDescriptorHandleForHeapStart());
         } else if (meta.arraySize == 1) {
             desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
             desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -242,10 +256,8 @@ namespace directx_renderer {
     void
     dx12_renderer::bind_texture(int obj, const std::string &texture, int regi) {
         auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
-        auto handle_sz = _device->GetDescriptorHandleIncrementSize(
-                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-        handle.ptr += obj * group_size();
-        handle.ptr += handle_sz * (regi + 2);
+        handle.ptr += handle_size() * TEX_GLOBAL_CNT;
+        handle.ptr += (obj * TEX_PER_OBJ + regi) * handle_size();
         auto texture_res = _textures[texture].second;
         auto desc = _textures[texture].first;
         _device->CreateShaderResourceView(texture_res.Get(), &desc, handle);
@@ -269,18 +281,21 @@ namespace directx_renderer {
         ThrowIfFailed(_cmd_list->Reset(_cmd_alloc.Get(), nullptr))
         _cmd_list->SetGraphicsRootSignature(
                 _signatures[shader_type::general].Get());
-        _cmd_list->SetGraphicsRootConstantBufferView(static_cast<uint8_t>(root_param::g_scene),
-                                                     _global_buffer->GetGPUVirtualAddress());
-        _cmd_list->SetGraphicsRootConstantBufferView(static_cast<uint8_t>(root_param::g_frame),
-                                                     _frame_globals_buffer->GetGPUVirtualAddress());
-        _cmd_list->SetGraphicsRootShaderResourceView(static_cast<uint8_t>(root_param::material),
-                                                     _mat_buffer->GetGPUVirtualAddress());
+        _cmd_list->SetGraphicsRootConstantBufferView(
+                static_cast<uint8_t>(root_param::g_scene),
+                _global_buffer->GetGPUVirtualAddress());
+        _cmd_list->SetGraphicsRootConstantBufferView(
+                static_cast<uint8_t>(root_param::g_frame),
+                _frame_globals_buffer->GetGPUVirtualAddress());
+        _cmd_list->SetGraphicsRootShaderResourceView(
+                static_cast<uint8_t>(root_param::material),
+                _mat_buffer->GetGPUVirtualAddress());
 
         ID3D12DescriptorHeap *heaps[] = {_res_desc_heap.Get()};
-        _cmd_list->SetDescriptorHeaps(_countof(heaps), heaps);
-        auto skybox_handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
-        skybox_handle.ptr += group_size() * OBJ_CNT;
-        _cmd_list->SetGraphicsRootDescriptorTable(static_cast<uint8_t>(root_param::g_texture), skybox_handle);
+        _cmd_list->SetDescriptorHeaps(_countof(heaps), heaps);;
+        _cmd_list->SetGraphicsRootDescriptorTable(
+                static_cast<uint8_t>(root_param::g_texture),
+                _res_desc_heap->GetGPUDescriptorHandleForHeapStart());
 
         {//draw shadow map
             _cmd_list->RSSetViewports(1, &(_shadow_map.viewport));
@@ -479,23 +494,41 @@ namespace directx_renderer {
         }
     }
 
+    [[deprecated("Use render(std::shared_ptr<renderee>) instead")]]
     void dx12_renderer::render(const render_info &info) {
         auto handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += group_size() * info.object_index;
-        _cmd_list->SetGraphicsRootDescriptorTable(4, handle);
+        _cmd_list->SetGraphicsRootDescriptorTable(
+                static_cast<uint8_t>(root_param::obj_texture), handle);
 
         _cmd_list->DrawIndexedInstanced(info.index_count, 1, info.index_offset,
                                         info.vertex_offset, 0);
     }
 
     void dx12_renderer::render(const std::shared_ptr<renderee> &r) {
+        _cmd_list->SetGraphicsRootConstantBufferView(
+                static_cast<uint8_t>(root_param::obj_const),
+                gpu_address<object_constant>(_obj_const_buffer, r->id));
+
+        _cmd_list->SetGraphicsRootConstantBufferView(
+                static_cast<uint8_t>(root_param::skin_matrix),
+                gpu_address<skin_matrix>(_skin_metrics_buf, r->id));
+
         auto handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
-        handle.ptr += group_size() * r->id;
-        _cmd_list->SetGraphicsRootDescriptorTable(static_cast<uint8_t>(root_param::obj_const), handle);
+        handle.ptr += handle_size() * TEX_GLOBAL_CNT;
+        handle.ptr += TEX_PER_OBJ * handle_size() * r->id;
+        _cmd_list->SetGraphicsRootDescriptorTable(
+                static_cast<uint8_t>(root_param::obj_texture), handle);
 
         _cmd_list->DrawIndexedInstanced(r->geo.index_count, 1,
                                         r->geo.index_offset,
                                         r->geo.vertex_offset, 0);
+    }
+
+    UINT dx12_renderer::handle_size() {
+        static const auto ret = _device->GetDescriptorHandleIncrementSize(
+                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        return ret;
     }
 
     void dx12_renderer::init_base(const window_info &info) {
@@ -658,34 +691,10 @@ namespace directx_renderer {
 
         D3D12_DESCRIPTOR_HEAP_DESC h_desc = {};
         h_desc.NodeMask = 0;
-        h_desc.NumDescriptors = OBJ_CNT * TABLE_SIZE + 2;//1 is for cube map;
+        h_desc.NumDescriptors = OBJ_CNT * TEX_PER_OBJ + TEX_GLOBAL_CNT;
         h_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         h_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         _device->CreateDescriptorHeap(&h_desc, IID_PPV_ARGS(&_res_desc_heap));
-
-        for (auto i = 0; i < OBJ_CNT; ++i) {
-            D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
-            cbv_desc.SizeInBytes = size_of_256<object_constant>();
-            cbv_desc.BufferLocation =
-                    _obj_const_buffer->GetGPUVirtualAddress() +
-                    size_of_256<object_constant>() * i;
-            auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
-            handle.ptr += group_size() * i;
-            _device->CreateConstantBufferView(&cbv_desc, handle);
-        }
-
-        for (auto i = 0; i < OBJ_CNT; ++i) {
-            D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc;
-            cbv_desc.SizeInBytes = size_of_256<skin_matrix>();
-            cbv_desc.BufferLocation =
-                    _skin_metrics_buf->GetGPUVirtualAddress() +
-                    size_of_256<skin_matrix>() * i;
-            auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
-            handle.ptr += group_size() * i +
-                          _device->GetDescriptorHandleIncrementSize(
-                                  D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-            _device->CreateConstantBufferView(&cbv_desc, handle);
-        }
     }
 
     void dx12_renderer::init_root_signature() {
@@ -772,16 +781,24 @@ namespace directx_renderer {
         };
 
         CD3DX12_DESCRIPTOR_RANGE t1[] = {
-                CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 2, 2),
                 CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 2)
         };
 
-        CD3DX12_ROOT_PARAMETER param[5];
-        param[static_cast<uint8_t>(root_param::g_scene)].InitAsConstantBufferView(0);//global_scene
-        param[static_cast<uint8_t>(root_param::g_frame)].InitAsConstantBufferView(1);//global_frame
-        param[static_cast<uint8_t>(root_param::material)].InitAsShaderResourceView(0, 1);//mats
-        param[static_cast<uint8_t>(root_param::g_texture)].InitAsDescriptorTable(_countof(t0), t0);//skybox, shadow
-        param[static_cast<uint8_t>(root_param::obj_const)].InitAsDescriptorTable(_countof(t1), t1);//object const
+        CD3DX12_ROOT_PARAMETER param[7];
+        param[static_cast<uint8_t>(root_param::g_scene)].InitAsConstantBufferView(
+                0);
+        param[static_cast<uint8_t>(root_param::g_frame)].InitAsConstantBufferView(
+                1);
+        param[static_cast<uint8_t>(root_param::obj_const)].InitAsConstantBufferView(
+                2);
+        param[static_cast<uint8_t>(root_param::skin_matrix)].InitAsConstantBufferView(
+                3);
+        param[static_cast<uint8_t>(root_param::g_texture)].InitAsDescriptorTable(
+                        _countof(t0), t0);
+        param[static_cast<uint8_t>(root_param::obj_texture)].InitAsDescriptorTable(
+                        _countof(t1), t1);
+        param[static_cast<uint8_t>(root_param::material)].InitAsShaderResourceView(
+                0, 1);
 
         auto sampler_arr = sampler::samplers();
 
@@ -984,7 +1001,6 @@ namespace directx_renderer {
 
     D3D12_CPU_DESCRIPTOR_HANDLE dx12_renderer::shadow_handle() {
         auto ret = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
-        ret.ptr += OBJ_CNT * group_size();
         ret.ptr += _device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         return ret;

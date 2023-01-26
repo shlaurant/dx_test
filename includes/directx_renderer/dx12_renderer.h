@@ -12,6 +12,7 @@
 #include "blur.h"
 #include "renderee.h"
 #include "shadow_map.h"
+#include "frame_resource.h"
 
 using namespace Microsoft::WRL;
 
@@ -87,9 +88,13 @@ namespace directx_renderer {
             wait_cmd_queue_sync();
         }
         void load_texture(const std::string &name, const std::wstring &path);
-        void load_material(const std::vector<std::string> &names, const std::vector<material> &mat);
+        void load_material(const std::vector<std::string> &names,
+                           const std::vector<material> &mat);
 
         void update_frame(const frame_globals &);
+        void update_frame(const frame_globals &,
+                          const std::vector<object_constant> &,
+                          const std::vector<skin_matrix> &);
 
         void init_renderees(std::vector<std::shared_ptr<renderee>>);
         void render();
@@ -101,7 +106,7 @@ namespace directx_renderer {
 
     private:
         enum class root_param : uint8_t {
-            g_scene, g_frame, material, g_texture, obj_const
+            g_scene, g_frame, obj_const, skin_matrix, g_texture, obj_texture, material
         };
 
         enum class layer : uint8_t {
@@ -157,19 +162,23 @@ namespace directx_renderer {
 
         //resource
         static const int TABLE_SIZE = 4;
+        static const int TEX_PER_OBJ = 2;
+        static const int TEX_GLOBAL_CNT = 2;
 
+        std::unique_ptr<frame_resource_buffer> _fres_buffer;
         std::unordered_map<uint32_t, std::unordered_map<std::string, geo_info>> _geo_infos;
         std::unordered_map<uint32_t, std::pair<ComPtr<
                 ID3D12Resource>, D3D12_VERTEX_BUFFER_VIEW>> _vertex_buffers;
         std::unordered_map<uint32_t, std::pair<ComPtr<
                 ID3D12Resource>, D3D12_INDEX_BUFFER_VIEW>> _index_buffers;
         global _global;
+
         ComPtr<ID3D12Resource> _global_buffer;//globals set automatically.
         ComPtr<ID3D12Resource> _frame_globals_buffer;
-
         ComPtr<ID3D12Resource> _obj_const_buffer;
         ComPtr<ID3D12Resource> _skin_metrics_buf;
         ComPtr<ID3D12Resource> _mat_buffer;
+
         std::unordered_map<std::string, int> _mat_ids;
         std::unordered_map<std::string, std::pair<D3D12_SHADER_RESOURCE_VIEW_DESC,
                 ComPtr<ID3D12Resource>>> _textures;
@@ -214,5 +223,6 @@ namespace directx_renderer {
         void init_terrain_signature();
         void init_shadow_signature();
         D3D12_CPU_DESCRIPTOR_HANDLE shadow_handle();
+        UINT handle_size();
     };
 }

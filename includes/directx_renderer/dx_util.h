@@ -40,4 +40,12 @@ namespace directx_renderer {
                           Microsoft::WRL::ComPtr<ID3D12Resource> &upload_buffer,
                           Microsoft::WRL::ComPtr<ID3D12Device> device,
                           Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmd_list);
+
+    template<typename T>
+    D3D12_GPU_VIRTUAL_ADDRESS
+    gpu_address(const Microsoft::WRL::ComPtr<ID3D12Resource> &buf, int index) {
+        auto ret = buf->GetGPUVirtualAddress();
+        ret += size_of_256<T>() * index;
+        return ret;
+    }
 }
