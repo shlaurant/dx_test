@@ -138,9 +138,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                     dx12.update_frame(fg, ocv, smv);
                 }
 
-                dx12.render_begin();
                 dx12.render();
-                dx12.render_end();
             }
         }
     } catch (DxException &e) {

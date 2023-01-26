@@ -36,11 +36,6 @@ namespace directx_renderer {
         SetWindowPos(info.hwnd, 0, 100, 100, info.width, info.height, 0);
     }
 
-    [[deprecated("Use update_frame with 3 args instead")]]
-    void dx12_renderer::update_frame(const frame_globals &d) {
-//        update_const_buffer<frame_globals>(_frame_globals_buffer, &d, 0);
-    }
-
     void dx12_renderer::update_frame(const frame_globals &fg,
                                      const std::vector<object_constant> &ocv,
                                      const std::vector<skin_matrix> &smv) {
@@ -108,6 +103,8 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::render() {
+        render_begin();
+
         _cmd_list->IASetVertexBuffers(0, 1,
                                       &(_vertex_buffers[type_id<vertex_billboard>()].second));
         _cmd_list->IASetIndexBuffer(
@@ -163,6 +160,8 @@ namespace directx_renderer {
         for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::translucent)]) {
             render(e);
         }
+
+        render_end();
     }
 
     void dx12_renderer::load_texture(const std::string &name,
@@ -379,117 +378,6 @@ namespace directx_renderer {
         _back_buffer = (_back_buffer + 1) % SWAP_CHAIN_BUFFER_COUNT;
 
         _cmd_queue->Signal(_fence.Get(), _fres_buffer->get().fence);
-    }
-
-    void dx12_renderer::render(const std::vector<render_info> &infos) {
-        _cmd_list->IASetVertexBuffers(0, 1,
-                                      &(_vertex_buffers[type_id<vertex_billboard>()].second));
-        _cmd_list->IASetIndexBuffer(
-                &(_index_buffers[type_id<vertex_billboard>()].second));
-        _cmd_list->IASetPrimitiveTopology(
-                D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-        _cmd_list->SetPipelineState(
-                _pso_list[static_cast<uint8_t>(layer::billboard)].Get());
-
-        for (const auto &e: infos) {
-            if (e.is_billboard) {
-                render(e);
-            }
-        }
-
-        _cmd_list->IASetVertexBuffers(0, 1,
-                                      &(_vertex_buffers[type_id<vertex>()].second));
-        _cmd_list->IASetIndexBuffer(
-                &(_index_buffers[type_id<vertex>()].second));
-        _cmd_list->IASetPrimitiveTopology(
-                D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
-        _cmd_list->SetPipelineState(
-                _pso_list[static_cast<uint8_t>(layer::terrain)].Get());
-
-        for (const auto &e: infos) {
-            if (e.is_terrain) render(e);
-        }
-
-        _cmd_list->IASetPrimitiveTopology(
-                D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-        std::vector<size_t> mirrors;
-        std::vector<size_t> trans;
-        std::vector<size_t> reflects;
-        std::vector<size_t> shadows;
-
-        _cmd_list->SetPipelineState(
-                _pso_list[static_cast<uint8_t>(layer::opaque)].Get());
-        for (auto i = 0; i < infos.size(); ++i) {
-            if (infos[i].is_billboard || infos[i].is_terrain) continue;
-
-            if (infos[i].do_reflect) {
-                reflects.push_back(i);
-            }
-
-            if (infos[i].do_shadow) {
-                shadows.push_back(i);
-            }
-
-            if (infos[i].is_mirror) {
-                mirrors.push_back(i);
-                trans.push_back(i);
-            } else if (infos[i].is_transparent) {
-                trans.push_back(i);
-            } else {
-                render(infos[i]);
-            }
-        }
-
-        if (mirrors.size() > 0 && reflects.size() > 0) {
-            _cmd_list->OMSetStencilRef(1);
-            _cmd_list->SetPipelineState(
-                    _pso_list[static_cast<uint8_t>(layer::mirror)].Get());
-
-            int k = 0;
-            for (auto i: mirrors) {
-                render(infos[i]);
-                _global.reflection_matrix[k]
-                        = Matrix::CreateReflection(infos[i].mirror_plane);
-                ++k;
-            }
-            _global.reflection_count = mirrors.size();
-            update_const_buffer(_global_buffer, &_global, 0);
-
-
-            _cmd_list->SetPipelineState(
-                    _pso_list[static_cast<uint8_t>(layer::reflection)].Get());
-
-            for (auto j: reflects) {
-                render(infos[j]);
-            }
-
-            _cmd_list->OMSetStencilRef(0);
-        }
-
-        if (trans.size() > 0) {
-            _cmd_list->SetPipelineState(
-                    _pso_list[static_cast<uint8_t>(layer::transparent)].Get());
-            for (auto i: trans) render(infos[i]);
-        }
-
-        if (shadows.size() > 0) {
-            _cmd_list->OMSetStencilRef(0);
-            _cmd_list->SetPipelineState(
-                    _pso_list[static_cast<uint8_t>(layer::shadow)].Get());
-            for (auto i: shadows) render(infos[i]);
-        }
-    }
-
-    [[deprecated("Use render(std::shared_ptr<renderee>) instead")]]
-    void dx12_renderer::render(const render_info &info) {
-        auto handle = _tex_desc_heap->GetGPUDescriptorHandleForHeapStart();
-        handle.ptr += group_size() * info.object_index;
-        _cmd_list->SetGraphicsRootDescriptorTable(
-                static_cast<uint8_t>(root_param::obj_texture), handle);
-
-        _cmd_list->DrawIndexedInstanced(info.index_count, 1, info.index_offset,
-                                        info.vertex_offset, 0);
     }
 
     void dx12_renderer::render(const std::shared_ptr<renderee> &r) {

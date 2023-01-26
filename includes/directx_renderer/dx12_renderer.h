@@ -89,19 +89,12 @@ namespace directx_renderer {
         void load_texture(const std::string &name, const std::wstring &path);
         void load_material(const std::vector<std::string> &names,
                            const std::vector<material> &mat);
-
-        void update_frame(const frame_globals &);
+        void init_renderees(std::vector<std::shared_ptr<renderee>>);
         void update_frame(const frame_globals &,
                           const std::vector<object_constant> &,
                           const std::vector<skin_matrix> &);
 
-        void init_renderees(std::vector<std::shared_ptr<renderee>>);
         void render();
-        void render(const std::shared_ptr<renderee> &);
-
-        void render_begin();
-        void render(const std::vector<render_info> &);
-        void render_end();
 
     private:
         enum class root_param : uint8_t {
@@ -204,7 +197,9 @@ namespace directx_renderer {
         void execute_cmd_list();
         void wait_cmd_queue_sync();
 
-        void render(const render_info &);
+        void render_begin();
+        void render_end();
+        void render(const std::shared_ptr<renderee> &);
 
         UINT group_size();
 
