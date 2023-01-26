@@ -199,7 +199,7 @@ namespace directx_renderer {
             desc.TextureCube.MostDetailedMip = 0;
 
             _device->CreateShaderResourceView(buf.Get(), &desc,
-                                              _res_desc_heap->GetCPUDescriptorHandleForHeapStart());
+                                              _tex_desc_heap->GetCPUDescriptorHandleForHeapStart());
         } else if (meta.arraySize == 1) {
             desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
             desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -255,9 +255,9 @@ namespace directx_renderer {
 
     void
     dx12_renderer::bind_texture(int obj, const std::string &texture, int regi) {
-        auto handle = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
-        handle.ptr += handle_size() * TEX_GLOBAL_CNT;
-        handle.ptr += (obj * TEX_PER_OBJ + regi) * handle_size();
+        auto handle = _tex_desc_heap->GetCPUDescriptorHandleForHeapStart();
+        handle.ptr += cbv_handle_size() * TEX_GLOBAL_CNT;
+        handle.ptr += (obj * TEX_PER_OBJ + regi) * cbv_handle_size();
         auto texture_res = _textures[texture].second;
         auto desc = _textures[texture].first;
         _device->CreateShaderResourceView(texture_res.Get(), &desc, handle);
@@ -291,11 +291,11 @@ namespace directx_renderer {
                 static_cast<uint8_t>(root_param::material),
                 _mat_buffer->GetGPUVirtualAddress());
 
-        ID3D12DescriptorHeap *heaps[] = {_res_desc_heap.Get()};
+        ID3D12DescriptorHeap *heaps[] = {_tex_desc_heap.Get()};
         _cmd_list->SetDescriptorHeaps(_countof(heaps), heaps);;
         _cmd_list->SetGraphicsRootDescriptorTable(
                 static_cast<uint8_t>(root_param::g_texture),
-                _res_desc_heap->GetGPUDescriptorHandleForHeapStart());
+                _tex_desc_heap->GetGPUDescriptorHandleForHeapStart());
 
         {//draw shadow map
             _cmd_list->RSSetViewports(1, &(_shadow_map.viewport));
@@ -496,7 +496,7 @@ namespace directx_renderer {
 
     [[deprecated("Use render(std::shared_ptr<renderee>) instead")]]
     void dx12_renderer::render(const render_info &info) {
-        auto handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
+        auto handle = _tex_desc_heap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += group_size() * info.object_index;
         _cmd_list->SetGraphicsRootDescriptorTable(
                 static_cast<uint8_t>(root_param::obj_texture), handle);
@@ -514,9 +514,9 @@ namespace directx_renderer {
                 static_cast<uint8_t>(root_param::skin_matrix),
                 gpu_address<skin_matrix>(_skin_metrics_buf, r->id));
 
-        auto handle = _res_desc_heap->GetGPUDescriptorHandleForHeapStart();
-        handle.ptr += handle_size() * TEX_GLOBAL_CNT;
-        handle.ptr += TEX_PER_OBJ * handle_size() * r->id;
+        auto handle = _tex_desc_heap->GetGPUDescriptorHandleForHeapStart();
+        handle.ptr += cbv_handle_size() * TEX_GLOBAL_CNT;
+        handle.ptr += TEX_PER_OBJ * cbv_handle_size() * r->id;
         _cmd_list->SetGraphicsRootDescriptorTable(
                 static_cast<uint8_t>(root_param::obj_texture), handle);
 
@@ -525,7 +525,7 @@ namespace directx_renderer {
                                         r->geo.vertex_offset, 0);
     }
 
-    UINT dx12_renderer::handle_size() {
+    UINT dx12_renderer::cbv_handle_size() {
         static const auto ret = _device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         return ret;
@@ -694,7 +694,7 @@ namespace directx_renderer {
         h_desc.NumDescriptors = OBJ_CNT * TEX_PER_OBJ + TEX_GLOBAL_CNT;
         h_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         h_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        _device->CreateDescriptorHeap(&h_desc, IID_PPV_ARGS(&_res_desc_heap));
+        _device->CreateDescriptorHeap(&h_desc, IID_PPV_ARGS(&_tex_desc_heap));
     }
 
     void dx12_renderer::init_root_signature() {
@@ -1000,7 +1000,7 @@ namespace directx_renderer {
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE dx12_renderer::shadow_handle() {
-        auto ret = _res_desc_heap->GetCPUDescriptorHandleForHeapStart();
+        auto ret = _tex_desc_heap->GetCPUDescriptorHandleForHeapStart();
         ret.ptr += _device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         return ret;

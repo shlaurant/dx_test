@@ -182,7 +182,7 @@ namespace directx_renderer {
         std::unordered_map<std::string, int> _mat_ids;
         std::unordered_map<std::string, std::pair<D3D12_SHADER_RESOURCE_VIEW_DESC,
                 ComPtr<ID3D12Resource>>> _textures;
-        ComPtr<ID3D12DescriptorHeap> _res_desc_heap;
+        ComPtr<ID3D12DescriptorHeap> _tex_desc_heap;
 
 
         //shader
@@ -223,6 +223,6 @@ namespace directx_renderer {
         void init_terrain_signature();
         void init_shadow_signature();
         D3D12_CPU_DESCRIPTOR_HANDLE shadow_handle();
-        UINT handle_size();
+        UINT cbv_handle_size();
     };
 }
