@@ -29,7 +29,6 @@ namespace directx_renderer {
     private:
         int id;
         geo_info geo;
-        object_constant constants;
 
         friend class dx12_renderer;
     };
