@@ -36,8 +36,9 @@ namespace directx_renderer {
         SetWindowPos(info.hwnd, 0, 100, 100, info.width, info.height, 0);
     }
 
+    [[deprecated("Use update_frame with 3 args instead")]]
     void dx12_renderer::update_frame(const frame_globals &d) {
-        update_const_buffer<frame_globals>(_frame_globals_buffer, &d, 0);
+//        update_const_buffer<frame_globals>(_frame_globals_buffer, &d, 0);
     }
 
     void dx12_renderer::update_frame(const frame_globals &fg,
@@ -102,17 +103,6 @@ namespace directx_renderer {
                     if (!ptr->texture[i].empty())
                         bind_texture(ptr->id, ptr->texture[i], i);
                 }
-
-                if (!ptr->material.empty()) ptr->constants.mat_id = _mat_ids[ptr->material];
-                ptr->constants.position = ptr->tr.position;
-                ptr->constants.world_matrix = ptr->tr.world_matrix();
-
-                update_const_buffer(_obj_const_buffer, &(ptr->constants),
-                                    ptr->id);
-
-                if (ptr->type == renderee_type::opaque_skinned)
-                    update_const_buffer(_skin_metrics_buf,
-                                        &(ptr->skin_matrices), ptr->id);
             }
         }
     }
@@ -272,13 +262,10 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::render_begin() {
-        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
-            update_const_buffer<skin_matrix>(_skin_metrics_buf,
-                                             &(e->skin_matrices), e->id);
-        }
-
-        ThrowIfFailed(_cmd_alloc->Reset())
         ThrowIfFailed(_cmd_list->Reset(_cmd_alloc.Get(), nullptr))
+
+        const auto &fres = _fres_buffer->peek();
+
         _cmd_list->SetGraphicsRootSignature(
                 _signatures[shader_type::general].Get());
         _cmd_list->SetGraphicsRootConstantBufferView(
@@ -286,13 +273,13 @@ namespace directx_renderer {
                 _global_buffer->GetGPUVirtualAddress());
         _cmd_list->SetGraphicsRootConstantBufferView(
                 static_cast<uint8_t>(root_param::g_frame),
-                _frame_globals_buffer->GetGPUVirtualAddress());
+                fres.frame_global->GetGPUVirtualAddress());
         _cmd_list->SetGraphicsRootShaderResourceView(
                 static_cast<uint8_t>(root_param::material),
                 _mat_buffer->GetGPUVirtualAddress());
 
         ID3D12DescriptorHeap *heaps[] = {_tex_desc_heap.Get()};
-        _cmd_list->SetDescriptorHeaps(_countof(heaps), heaps);;
+        _cmd_list->SetDescriptorHeaps(_countof(heaps), heaps);
         _cmd_list->SetGraphicsRootDescriptorTable(
                 static_cast<uint8_t>(root_param::g_texture),
                 _tex_desc_heap->GetGPUDescriptorHandleForHeapStart());
@@ -391,7 +378,7 @@ namespace directx_renderer {
         _swap_chain->Present(0, 0);
         _back_buffer = (_back_buffer + 1) % SWAP_CHAIN_BUFFER_COUNT;
 
-        wait_cmd_queue_sync();
+        _cmd_queue->Signal(_fence.Get(), _fres_buffer->get().fence);
     }
 
     void dx12_renderer::render(const std::vector<render_info> &infos) {
@@ -506,13 +493,15 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::render(const std::shared_ptr<renderee> &r) {
+        const auto &fres = _fres_buffer->peek();
+
         _cmd_list->SetGraphicsRootConstantBufferView(
                 static_cast<uint8_t>(root_param::obj_const),
-                gpu_address<object_constant>(_obj_const_buffer, r->id));
+                gpu_address<object_constant>(fres.object_const, r->id));
 
         _cmd_list->SetGraphicsRootConstantBufferView(
                 static_cast<uint8_t>(root_param::skin_matrix),
-                gpu_address<skin_matrix>(_skin_metrics_buf, r->id));
+                gpu_address<skin_matrix>(fres.skin_matrix, r->id));
 
         auto handle = _tex_desc_heap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += cbv_handle_size() * TEX_GLOBAL_CNT;
@@ -683,10 +672,7 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::init_resources() {
-        _frame_globals_buffer = create_const_buffer<frame_globals>(1, _device);
-        _obj_const_buffer = create_const_buffer<object_constant>(OBJ_CNT,
-                                                                 _device);
-        _skin_metrics_buf = create_const_buffer<skin_matrix>(OBJ_CNT, _device);
+        _fres_buffer = std::make_unique<frame_resource_buffer>(_device, FRAME_RESOURCE_BUFFER_SIZE, OBJ_CNT);
         _mat_buffer = create_upload_buffer(OBJ_CNT, sizeof(material), _device);
 
         D3D12_DESCRIPTOR_HEAP_DESC h_desc = {};

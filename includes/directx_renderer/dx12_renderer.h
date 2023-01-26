@@ -26,7 +26,6 @@ namespace directx_renderer {
 
     class dx12_renderer {
     public:
-        const static int SWAP_CHAIN_BUFFER_COUNT = 2;
         const static int OBJ_CNT = 20;
 
         void init(const window_info &);
@@ -106,28 +105,29 @@ namespace directx_renderer {
 
     private:
         enum class root_param : uint8_t {
-            g_scene, g_frame, obj_const, skin_matrix, g_texture, obj_texture, material
+            g_scene,
+            g_frame,
+            obj_const,
+            skin_matrix,
+            g_texture,
+            obj_texture,
+            material
         };
 
         enum class layer : uint8_t {
-            opaque,
-            transparent,
-            mirror,
-            reflection,
-            shadow,
-            billboard,
-            blur_h,
-            blur_v,
-            terrain,
-            skybox,
-            dynamic_shadow,
-            skinned,
-            end
+            opaque, transparent, mirror, reflection, shadow, billboard, blur_h,
+            blur_v, terrain, skybox, dynamic_shadow, skinned, end
         };
 
         enum class shader_type {
             general, blur, terrain, shadow
         };
+
+        const static int SWAP_CHAIN_BUFFER_COUNT = 2;
+        const static int FRAME_RESOURCE_BUFFER_SIZE = 3;
+        static const int TABLE_SIZE = 4;
+        static const int TEX_PER_OBJ = 2;
+        static const int TEX_GLOBAL_CNT = 2;
 
         ComPtr<IDXGIFactory> _factory;
         ComPtr<ID3D12Device> _device;
@@ -161,10 +161,6 @@ namespace directx_renderer {
         std::unordered_map<shader_type, ComPtr<ID3D12RootSignature>> _signatures;
 
         //resource
-        static const int TABLE_SIZE = 4;
-        static const int TEX_PER_OBJ = 2;
-        static const int TEX_GLOBAL_CNT = 2;
-
         std::unique_ptr<frame_resource_buffer> _fres_buffer;
         std::unordered_map<uint32_t, std::unordered_map<std::string, geo_info>> _geo_infos;
         std::unordered_map<uint32_t, std::pair<ComPtr<
@@ -174,9 +170,6 @@ namespace directx_renderer {
         global _global;
 
         ComPtr<ID3D12Resource> _global_buffer;//globals set automatically.
-        ComPtr<ID3D12Resource> _frame_globals_buffer;
-        ComPtr<ID3D12Resource> _obj_const_buffer;
-        ComPtr<ID3D12Resource> _skin_metrics_buf;
         ComPtr<ID3D12Resource> _mat_buffer;
 
         std::unordered_map<std::string, int> _mat_ids;

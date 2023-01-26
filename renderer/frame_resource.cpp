@@ -40,6 +40,8 @@ namespace directx_renderer {
                     (cur_res.skin_matrix, &(smv[i]), i);
         }
 
+        cur_res.fence = fence;
+
         _put = (_put + 1) % _resources.size();
     }
 
