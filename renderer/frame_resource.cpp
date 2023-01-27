@@ -4,16 +4,16 @@
 namespace directx_renderer {
 
     frame_resource_buffer::frame_resource_buffer(
-            Microsoft::WRL::ComPtr<ID3D12Device> device, uint8_t buf_size,
-            size_t obj_cnt) : _resources(
-            std::vector<frame_resource>(buf_size)) {
+            Microsoft::WRL::ComPtr<ID3D12Device> device,
+            const frame_resource_size &size) : _resources(
+            std::vector<frame_resource>(size.buf_size)) {
         for (auto &e: _resources) {
             e.frame_global =
                     create_const_buffer<frame_globals>(1, device);
             e.object_const =
-                    create_const_buffer<object_constant>(obj_cnt, device);
+                    create_const_buffer<object_constant>(size.obj_cnt, device);
             e.skin_matrix =
-                    create_const_buffer<skin_matrix>(obj_cnt, device);
+                    create_const_buffer<skin_matrix>(size.skin_cnt, device);
         }
     }
 

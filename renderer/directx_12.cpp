@@ -563,9 +563,9 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::init_resources() {
-        _fres_buffer = std::make_unique<frame_resource_buffer>(_device,
-                                                               FRAME_RESOURCE_BUFFER_SIZE,
-                                                               OBJ_CNT);
+        frame_resource_size size = {FRAME_RESOURCE_BUFFER_SIZE, OBJ_CNT,
+                                    SKIN_CNT};
+        _fres_buffer = std::make_unique<frame_resource_buffer>(_device, size);
         _mat_buffer = create_upload_buffer(OBJ_CNT, sizeof(material), _device);
 
         D3D12_DESCRIPTOR_HEAP_DESC h_desc = {};

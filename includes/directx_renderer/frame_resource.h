@@ -11,10 +11,15 @@ namespace directx_renderer {
         UINT64 fence = 0;
     };
 
+    struct frame_resource_size {
+        int buf_size;
+        int obj_cnt;
+        int skin_cnt;
+    };
+
     class frame_resource_buffer {
     public:
-        frame_resource_buffer(Microsoft::WRL::ComPtr<ID3D12Device> device,
-                              uint8_t buf_size, size_t obj_cnt);
+        frame_resource_buffer(Microsoft::WRL::ComPtr<ID3D12Device> device,const frame_resource_size &size);
         bool can_put(UINT64 last_comp_fence);
         inline UINT64 cur_fence() const { return _resources[_put].fence; }
         void put(const frame_globals &, const std::vector<object_constant> &,

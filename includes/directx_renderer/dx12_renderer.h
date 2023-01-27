@@ -29,6 +29,7 @@ namespace directx_renderer {
     class dx12_renderer {
     public:
         const static int OBJ_CNT = 20;
+        const static int SKIN_CNT = 3;
 
         void init(const window_info &);
 
