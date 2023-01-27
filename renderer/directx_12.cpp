@@ -392,7 +392,7 @@ namespace directx_renderer {
 
         _cmd_list->SetGraphicsRootConstantBufferView(
                 static_cast<uint8_t>(root_param::skin_matrix),
-                gpu_address<skin_matrix>(fres.skin_matrix, r->id));
+                gpu_address<skin_matrix>(fres.skin_matrix, r->skin_matrix));
 
         auto handle = _tex_desc_heap->GetGPUDescriptorHandleForHeapStart();
         handle.ptr += cbv_handle_size() * TEX_GLOBAL_CNT;
