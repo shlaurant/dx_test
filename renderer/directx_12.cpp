@@ -8,13 +8,14 @@ using namespace DirectX::SimpleMath;
 
 namespace directx_renderer {
     void dx12_renderer::init(const window_info &info) {
-        {
-            ComPtr<ID3D12Debug> debugController;
-            if (SUCCEEDED(
-                    D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-                debugController->EnableDebugLayer();
-            }
+
+#ifdef _DEBUG
+        ComPtr<ID3D12Debug> debugController;
+        if (SUCCEEDED(
+                D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+            debugController->EnableDebugLayer();
         }
+#endif
 
         init_base(info);
         init_cmds();
