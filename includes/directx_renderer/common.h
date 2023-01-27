@@ -70,9 +70,9 @@ namespace directx_renderer {
 
     template<typename T>
     struct geometry {
-        std::string name;
+        std::vector<std::string> names;
         std::vector<T> vertices;
-        std::vector<uint16_t> indices;
+        std::vector<std::vector<uint16_t>> indices;
 
         DirectX::SimpleMath::Matrix world_matrix = DirectX::SimpleMath::Matrix::Identity;
 

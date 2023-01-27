@@ -190,15 +190,16 @@ void load_geometries(directx_renderer::dx12_renderer &dx12) {
     auto geo = create_geometries();
     std::vector<directx_renderer::geometry<directx_renderer::vertex_billboard>> geo1;
     geo1.resize(1);
+    geo1[0].indices.resize(1);
     directx_renderer::vertex_billboard v{Vector3(0.0f, 0.0f, 0.f),
                                          Vector2(1.f, 1.f)};
-    geo1[0].name = "billboard";
+    geo1[0].names.push_back("billboard");
     geo1[0].vertices = {{Vector3(0.0f, 0.0f, 0.f), Vector2(1.f, 1.f)},
                         {Vector3(1.0f, 0.0f, 0.f), Vector2(1.5f, 1.5f)},
                         {Vector3(2.0f, 0.0f, 0.f), Vector2(1.f, 1.f)}};
-    geo1[0].indices.emplace_back(0);
-    geo1[0].indices.emplace_back(1);
-    geo1[0].indices.emplace_back(2);
+    geo1[0].indices[0].emplace_back(0);
+    geo1[0].indices[0].emplace_back(1);
+    geo1[0].indices[0].emplace_back(2);
 
     dx12.init_geometries<directx_renderer::vertex>(geo);
     dx12.init_geometries<directx_renderer::vertex_billboard>(geo1);
@@ -353,21 +354,53 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
 //        house->tr.position = Vector3(0.f, 6.f, -5.f);
 //        renderees.emplace_back(house);
 
-        auto dragon = std::make_shared<directx_renderer::renderee>();
-        dragon->name = "dragon";
-        dragon->type = directx_renderer::renderee_type::opaque_skinned;
-        dragon->geometry = "dragonDragon_Mesh";
-        dragon->texture[0] = "dragon_diffuse";
-        dragon->texture[1] = "dragon_normal";
-        dragon->material = rough;
+        auto dragon0 = std::make_shared<directx_renderer::renderee>();
+        dragon0->name = "dragon";
+        dragon0->type = directx_renderer::renderee_type::opaque_skinned;
+        dragon0->geometry = "dragon0_Dragon_Mesh";
+        dragon0->texture[0] = "dragon_diffuse";
+        dragon0->texture[1] = "dragon_normal";
+        dragon0->material = rough;
         {
             directx_renderer::transform tr;
             tr.position = Vector3(0.f, 6.f, -5.f);
             tr.scale = Vector3(0.25f, 0.25f, 0.25f);
             trv.push_back(tr);
         }
-        dragon->skin_matrix = 0;
-        renderees.emplace_back(dragon);
+        dragon0->skin_matrix = 0;
+        renderees.emplace_back(dragon0);
+
+        auto dragon1 = std::make_shared<directx_renderer::renderee>();
+        dragon1->name = "dragon";
+        dragon1->type = directx_renderer::renderee_type::opaque_skinned;
+        dragon1->geometry = "dragon1_Dragon_Mesh";
+        dragon1->texture[0] = "dragon_diffuse";
+        dragon1->texture[1] = "dragon_normal";
+        dragon1->material = rough;
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(0.f, 6.f, -5.f);
+            tr.scale = Vector3(0.25f, 0.25f, 0.25f);
+            trv.push_back(tr);
+        }
+        dragon1->skin_matrix = 0;
+        renderees.emplace_back(dragon1);
+
+        auto dragon2 = std::make_shared<directx_renderer::renderee>();
+        dragon2->name = "dragon";
+        dragon2->type = directx_renderer::renderee_type::opaque_skinned;
+        dragon2->geometry = "dragon2_Dragon_Mesh";
+        dragon2->texture[0] = "dragon_diffuse";
+        dragon2->texture[1] = "dragon_normal";
+        dragon2->material = rough;
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(0.f, 6.f, -5.f);
+            tr.scale = Vector3(0.25f, 0.25f, 0.25f);
+            trv.push_back(tr);
+        }
+        dragon2->skin_matrix = 0;
+        renderees.emplace_back(dragon2);
     }
 
     return renderees;
@@ -406,23 +439,23 @@ create_geometries() {
     std::vector<directx_renderer::geometry<directx_renderer::vertex>> ret;
 
     auto cube0 = create_cube_uv();
-    cube0.name = "cube";
+    cube0.names.push_back("cube");
     ret.emplace_back(cube0);
 
     auto plane = create_plain(100, 100);
-    plane.name = "plane";
+    plane.names.push_back("plane");
     ret.emplace_back(plane);
 
     auto mirror = create_plain(5, 5);
-    mirror.name = "mirror";
+    mirror.names.push_back("mirror");
     ret.emplace_back(mirror);
 
     auto skull = load_mesh("resource/skull.txt");
-    skull.name = "skull";
+    skull.names.push_back("skull");
     ret.emplace_back(skull);
 
     auto terrain = create_terrain(20, 2);
-    terrain.name = "terrain";
+    terrain.names.push_back("terrain");
     ret.emplace_back(terrain);
 
 //    fbx_loader.LoadFbx(L"resource\\male.fbx", "male");

@@ -47,7 +47,7 @@ struct BoneWeight {
 struct FbxMeshInfo {
     std::wstring name;
     std::vector<directx_renderer::vertex> vertices;
-    std::vector<std::vector<uint32_t>> indices;
+    std::vector<std::vector<uint16_t>> indices;
     std::vector<FbxMaterialInfo> materials;
     std::vector<BoneWeight> boneWeights;
     bool hasAnimation;

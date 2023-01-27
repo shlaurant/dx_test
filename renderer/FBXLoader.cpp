@@ -45,9 +45,13 @@ std::vector<geometry<vertex>> FBXLoader::geometries() {
     std::vector<geometry<vertex>> ret;
     for (const auto &e: _meshes) {
         geometry<vertex> geo;
-        geo.name = _name + ws2s(e.name);
         geo.vertices = e.vertices;
-        for (auto i: e.indices[0]) geo.indices.push_back(i);
+        int i = 0;
+        for (const auto &iv: e.indices) {
+            geo.names.push_back(
+                    _name + std::to_string(i++) + "_" + ws2s(e.name));
+            geo.indices.push_back(iv);
+        }
         ret.emplace_back(geo);
     }
     return ret;

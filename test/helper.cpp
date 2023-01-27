@@ -409,7 +409,7 @@ directx_renderer::geometry<directx_renderer::vertex> create_cube_uv() {
     idx[35] = 23;
 
     ret.vertices = vec;
-    ret.indices = idx;
+    ret.indices.push_back(idx);
 
     return ret;
 }
@@ -417,6 +417,7 @@ directx_renderer::geometry<directx_renderer::vertex> create_cube_uv() {
 directx_renderer::geometry<directx_renderer::vertex>
 create_plain(int width, int height) {
     directx_renderer::geometry<directx_renderer::vertex> ret;
+    ret.indices.resize(1);
 
     auto cnt = (width + 1) * (height + 1);
     ret.vertices.resize(cnt);
@@ -433,12 +434,12 @@ create_plain(int width, int height) {
     for (auto i = 0; i < height; ++i) {
         for (auto j = 0; j < width; ++j) {
             auto index = (width + 1) * i + j;
-            ret.indices.push_back(index);
-            ret.indices.push_back(index + width + 1);
-            ret.indices.push_back(index + 1);
-            ret.indices.push_back(index + width + 1);
-            ret.indices.push_back(index + width + 2);
-            ret.indices.push_back(index + 1);
+            ret.indices[0].push_back(index);
+            ret.indices[0].push_back(index + width + 1);
+            ret.indices[0].push_back(index + 1);
+            ret.indices[0].push_back(index + width + 1);
+            ret.indices[0].push_back(index + width + 2);
+            ret.indices[0].push_back(index + 1);
         }
     }
 
@@ -472,6 +473,7 @@ DirectX::SimpleMath::Vector3 read_v3(std::ifstream &ifs) {
 directx_renderer::geometry<directx_renderer::vertex>
 load_mesh(const std::string &path) {
     directx_renderer::geometry<directx_renderer::vertex> ret;
+    ret.indices.resize(1);
 
     std::ifstream fs(path.data());
     if (fs.is_open()) {
@@ -501,13 +503,13 @@ load_mesh(const std::string &path) {
         for (auto i = 0; i < tcnt; ++i) {
             fs >> str;
             uint16_t ind = std::stoi(str);
-            ret.indices.push_back(ind);
+            ret.indices[0].push_back(ind);
             fs >> str;
             ind = std::stoi(str);
-            ret.indices.push_back(ind);
+            ret.indices[0].push_back(ind);
             fs >> str;
             ind = std::stoi(str);
-            ret.indices.push_back(ind);
+            ret.indices[0].push_back(ind);
         }
     }
 
@@ -517,7 +519,7 @@ load_mesh(const std::string &path) {
 directx_renderer::geometry<directx_renderer::vertex>
 create_terrain(int half, int unit_sz) {
     directx_renderer::geometry<directx_renderer::vertex> ret;
-
+    ret.indices.resize(1);
 
     for (auto z = half; z >= -half; --z) {
         for (auto x = -half; x <= half; ++x) {
@@ -536,12 +538,12 @@ create_terrain(int half, int unit_sz) {
         for (auto x = -half; x < half; ++x) {
             int line_cnt = 2 * half + 1;
             auto point_index = (half - z) * line_cnt + x + half;
-            ret.indices.push_back(point_index);
-            ret.indices.push_back(point_index + 1);
-            ret.indices.push_back(point_index + 1 + line_cnt);
-            ret.indices.push_back(point_index);
-            ret.indices.push_back(point_index + line_cnt + 1);
-            ret.indices.push_back(point_index + line_cnt);
+            ret.indices[0].push_back(point_index);
+            ret.indices[0].push_back(point_index + 1);
+            ret.indices[0].push_back(point_index + 1 + line_cnt);
+            ret.indices[0].push_back(point_index);
+            ret.indices[0].push_back(point_index + line_cnt + 1);
+            ret.indices[0].push_back(point_index + line_cnt);
         }
     }
 

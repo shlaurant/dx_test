@@ -48,17 +48,20 @@ namespace directx_renderer {
 
             for (auto &e: geometries) {
                 e.vertex_offset = index_v;
-                e.index_offset = index_i;
                 std::copy(e.vertices.begin(), e.vertices.end(),
                           std::back_inserter(vertices));
                 index_v += e.vertices.size();
-                std::copy(e.indices.begin(), e.indices.end(),
-                          std::back_inserter(indices));
-                index_i += e.indices.size();
 
-                _geo_infos[type_id<T>()][e.name] = {(UINT) e.vertex_offset,
-                                                    (UINT) e.index_offset,
-                                                    (UINT) e.indices.size()};
+                for (auto i = 0; i < e.names.size(); ++i) {
+                    std::copy(e.indices[i].begin(), e.indices[i].end(),
+                              std::back_inserter(indices));
+                    e.index_offset = index_i;
+                    index_i += e.indices[i].size();
+                    _geo_infos[type_id<T>()][e.names[i]] = {
+                            (UINT) e.vertex_offset,
+                            (UINT) e.index_offset,
+                            (UINT) e.indices[i].size()};
+                }
             }
 
             auto vert_byte_size = sizeof(T) * vertices.size();
