@@ -71,10 +71,9 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         dx12.init({hwnd, 1920, 1080, true});
         auto li = create_light_info();
 
-//        dragon_fbx.LoadFbx(L"resource\\Dragon.fbx", "dragon");
-//        animator anim;
-//        anim.init(dragon_fbx.GetAnimClip()[0], dragon_fbx.GetBones());
-//        anim.final_matrices_after(0.f, renderees.back()->skin_matrices);
+        dragon_fbx.LoadFbx(L"resource\\Dragon.fbx", "dragon");
+        animator anim;
+        anim.init(dragon_fbx.GetAnimClip()[0], dragon_fbx.GetBones());
 
         load_geometries(dx12);
         load_textures(dx12);
@@ -94,6 +93,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
         std::vector<directx_renderer::object_constant> ocv(renderees.size());
         std::vector<directx_renderer::skin_matrix> smv(renderees.size());
 
+        anim.final_matrices_after(0.f, renderees.back()->skin_matrices);
         timer.Start();
         while (msg.message != WM_QUIT) {
             if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
@@ -106,7 +106,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                     txt += std::to_wstring(1 / timer.DeltaTime());
                     SetWindowText(hwnd, txt.c_str());
                     input.Update();
-//                    anim.final_matrices_after(timer.DeltaTime(),renderees.back()->skin_matrices);
+                    anim.final_matrices_after(timer.DeltaTime(),renderees.back()->skin_matrices);
                     handle_input(input, camera, timer);
                     fg.camera_position = camera->tr.position;
                     fg.camera_vp = camera->view() * camera->projection();
@@ -322,7 +322,7 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         dragon->material = rough;
         dragon->tr.position = Vector3(0.f, 6.f, -5.f);
         dragon->tr.scale = Vector3(0.25f, 0.25f, 0.25f);
-//        renderees.emplace_back(dragon);
+        renderees.emplace_back(dragon);
     }
 
     return renderees;
@@ -390,9 +390,9 @@ create_geometries() {
 //        ret.emplace_back(e);
 //    }
 
-//    for (const auto &e: dragon_fbx.geometries()) {
-//        ret.emplace_back(e);
-//    }
+    for (const auto &e: dragon_fbx.geometries()) {
+        ret.emplace_back(e);
+    }
 
     return std::move(ret);
 }
