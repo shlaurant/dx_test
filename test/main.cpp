@@ -12,6 +12,7 @@ using namespace DirectX::SimpleMath;
 
 Input input;
 FBXLoader dragon_fbx;
+std::vector<directx_renderer::transform> trv;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -133,8 +134,8 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                     fg.shadow_uv = fg.light_vp * ndc_to_uv;
 
                     for (auto i = 0; i < renderees.size(); ++i) {
-                        ocv[i].position = renderees[i]->tr.position;
-                        ocv[i].world_matrix = renderees[i]->tr.world_matrix();
+                        ocv[i].position = trv[i].position;
+                        ocv[i].world_matrix = trv[i].world_matrix();
                         ocv[i].mat_id = renderees[i]->material;
                     }
 
@@ -174,13 +175,13 @@ void load_textures(directx_renderer::dx12_renderer &dx12) {
 void load_materials(directx_renderer::dx12_renderer &dx12) {
     dx12.load_material({"default", "metal", "rough", "glass", "terrain"},
                        {{Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.5f, 0.5f, 0.5f), .5f},
+                                Vector3(0.5f, 0.5f, 0.5f),      .5f},
                         {Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.9f, 0.9f, 0.9f), .1f},
+                                Vector3(0.9f, 0.9f, 0.9f),      .1f},
                         {Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.1f, 0.1f, 0.1f), .9f},
+                                Vector3(0.1f, 0.1f, 0.1f),      .9f},
                         {Vector4(.5f, .5f, .5f, .5f),
-                                Vector3(0.5f, 0.5f, 0.5f), .1f},
+                                Vector3(0.5f, 0.5f, 0.5f),      .1f},
                         {Vector4(.5f, .5f, .5f, 1.f),
                                 Vector3(0.001f, 0.001, 0.001f), .99f}});
 }
@@ -215,8 +216,12 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         skull0->texture[0] = "marble_diffuse";
         skull0->texture[1] = "default_normal";
         skull0->material = def;
-        skull0->tr.scale = Vector3(.5f, .5f, .5f);
-        skull0->tr.position = Vector3(-5.f, 6.f, 3.f);
+        {
+            directx_renderer::transform tr;
+            tr.scale = Vector3(.5f, .5f, .5f);
+            tr.position = Vector3(-5.f, 6.f, 3.f);
+            trv.push_back(tr);
+        }
         renderees.emplace_back(skull0);
 
         auto skull1 = std::make_shared<directx_renderer::renderee>();
@@ -226,7 +231,11 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         skull1->texture[0] = "marble_diffuse";
         skull1->texture[1] = "default_normal";
         skull1->material = rough;
-        skull1->tr.position = Vector3(-12.f, 1.f, 3.f);
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(-12.f, 1.f, 3.f);
+            trv.push_back(tr);
+        }
         renderees.emplace_back(skull1);
 
         auto skull2 = std::make_shared<directx_renderer::renderee>();
@@ -236,7 +245,11 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         skull2->texture[0] = "marble_diffuse";
         skull2->texture[1] = "default_normal";
         skull2->material = metal;
-        skull2->tr.position = Vector3(-19.f, 1.f, 3.f);
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(-19.f, 1.f, 3.f);
+            trv.push_back(tr);
+        }
         renderees.emplace_back(skull2);
 
         auto skull3 = std::make_shared<directx_renderer::renderee>();
@@ -246,7 +259,11 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         skull3->texture[0] = "marble_diffuse";
         skull3->texture[1] = "default_normal";
         skull3->material = glass;
-        skull3->tr.position = Vector3(-26.f, 1.f, 3.f);
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(-26.f, 1.f, 3.f);
+            trv.push_back(tr);
+        }
         renderees.emplace_back(skull3);
 
         auto wire = std::make_shared<directx_renderer::renderee>();
@@ -255,7 +272,11 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         wire->geometry = "cube";
         wire->texture[0] = "wire";
         wire->material = rough;
-        wire->tr.position = Vector3(0.f, 6.f, 3.f);
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(0.f, 6.f, 3.f);
+            trv.push_back(tr);
+        }
         renderees.emplace_back(wire);
 
         auto cube0 = std::make_shared<directx_renderer::renderee>();
@@ -265,7 +286,11 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         cube0->texture[0] = "marble_diffuse";
         cube0->texture[1] = "marble_normal";
         cube0->material = def;
-        cube0->tr.position = Vector3(3.f, 20.f, 3.f);
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(3.f, 20.f, 3.f);
+            trv.push_back(tr);
+        }
         renderees.emplace_back(cube0);
 
         auto tree_billboard = std::make_shared<directx_renderer::renderee>();
@@ -274,7 +299,11 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         tree_billboard->geometry = "billboard";
         tree_billboard->texture[0] = "tree_arr";
         tree_billboard->material = rough;
-        tree_billboard->tr.position = Vector3(0.f, 6.f, 10.f);
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(0.f, 6.f, 10.f);
+            trv.push_back(tr);
+        }
         renderees.emplace_back(tree_billboard);
 
         auto terrain = std::make_shared<directx_renderer::renderee>();
@@ -284,7 +313,11 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         terrain->texture[0] = "terrain_d";
         terrain->texture[1] = "terrain_h";
         terrain->material = ter;
-        terrain->tr.position = Vector3(0.f, 0.f, 0.f);
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(0.f, 0.f, 0.f);
+            trv.push_back(tr);
+        }
         renderees.emplace_back(terrain);
 
         auto sky = std::make_shared<directx_renderer::renderee>();
@@ -293,7 +326,11 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         sky->geometry = "cube";
         sky->texture[0] = "skybox";
         sky->material = def;
-        sky->tr.position = Vector3(0.f, 0.f, 0.f);
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(0.f, 0.f, 0.f);
+            trv.push_back(tr);
+        }
         renderees.emplace_back(sky);
 
         auto body = std::make_shared<directx_renderer::renderee>();
@@ -303,8 +340,8 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         body->texture[0] = "male_diffuse";
         body->texture[1] = "male_normal";
         body->material = rough;
-        body->tr.scale = Vector3(.1f, .1f, .1f);
-        body->tr.position = Vector3(6.f, 12.f, 0.f);
+//        body->tr.scale = Vector3(.1f, .1f, .1f);
+//        body->tr.position = Vector3(6.f, 12.f, 0.f);
 //        renderees.emplace_back(body);
 
         auto house = std::make_shared<directx_renderer::renderee>();
@@ -313,7 +350,7 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         house->geometry = "houseCube.009";
         house->texture[0] = "house_diffuse";
         house->material = rough;
-        house->tr.position = Vector3(0.f, 6.f, -5.f);
+//        house->tr.position = Vector3(0.f, 6.f, -5.f);
 //        renderees.emplace_back(house);
 
         auto dragon = std::make_shared<directx_renderer::renderee>();
@@ -323,8 +360,12 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         dragon->texture[0] = "dragon_diffuse";
         dragon->texture[1] = "dragon_normal";
         dragon->material = rough;
-        dragon->tr.position = Vector3(0.f, 6.f, -5.f);
-        dragon->tr.scale = Vector3(0.25f, 0.25f, 0.25f);
+        {
+            directx_renderer::transform tr;
+            tr.position = Vector3(0.f, 6.f, -5.f);
+            tr.scale = Vector3(0.25f, 0.25f, 0.25f);
+            trv.push_back(tr);
+        }
         dragon->skin_matrix = 0;
         renderees.emplace_back(dragon);
     }

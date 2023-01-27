@@ -23,7 +23,6 @@ namespace directx_renderer {
         std::string geometry;
         std::string texture[2] = {"", ""};
         int material;
-        transform tr;
         int skin_matrix;
 
     private:
