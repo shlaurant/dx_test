@@ -91,9 +91,12 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
             fg.lights[i] = li.lights[i];
         }
         std::vector<directx_renderer::object_constant> ocv(renderees.size());
-        std::vector<directx_renderer::skin_matrix> smv(renderees.size());
+        std::vector<directx_renderer::skin_matrix> smv(1);
 
-        anim.final_matrices_after(0.f, renderees.back()->skin_matrices);
+        for (auto &e: smv) {
+            anim.final_matrices_after(0.f, e);
+        }
+
         timer.Start();
         while (msg.message != WM_QUIT) {
             if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
@@ -106,7 +109,8 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                     txt += std::to_wstring(1 / timer.DeltaTime());
                     SetWindowText(hwnd, txt.c_str());
                     input.Update();
-                    anim.final_matrices_after(timer.DeltaTime(),renderees.back()->skin_matrices);
+                    for (auto &e: smv)
+                        anim.final_matrices_after(timer.DeltaTime(), e);
                     handle_input(input, camera, timer);
                     fg.camera_position = camera->tr.position;
                     fg.camera_vp = camera->view() * camera->projection();
@@ -118,7 +122,8 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                     light_cam.tr.position = center + (-light_vec * 2) * 10.f;
                     light_cam.tr.rotation.x = DirectX::XM_PI / 4.f;
                     auto view = light_cam.view();
-                    auto proj = DirectX::XMMatrixOrthographicLH(80.f, 80.f, 1.f, 100.f);
+                    auto proj = DirectX::XMMatrixOrthographicLH(80.f, 80.f, 1.f,
+                                                                100.f);
                     Matrix ndc_to_uv = {.5f, .0f, .0f, .0f,
                                         .0f, -.5f, .0f, .0f,
                                         .0f, .0f, 1.f, 0.f,
@@ -127,12 +132,10 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
                     fg.light_vp = view * proj;
                     fg.shadow_uv = fg.light_vp * ndc_to_uv;
 
-                    for(auto i = 0; i < renderees.size(); ++i){
+                    for (auto i = 0; i < renderees.size(); ++i) {
                         ocv[i].position = renderees[i]->tr.position;
                         ocv[i].world_matrix = renderees[i]->tr.world_matrix();
                         ocv[i].mat_id = renderees[i]->material;
-
-                        smv[i] = renderees[i]->skin_matrices;
                     }
 
                     dx12.update_frame(fg, ocv, smv);
@@ -171,13 +174,13 @@ void load_textures(directx_renderer::dx12_renderer &dx12) {
 void load_materials(directx_renderer::dx12_renderer &dx12) {
     dx12.load_material({"default", "metal", "rough", "glass", "terrain"},
                        {{Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.5f, 0.5f, 0.5f),      .5f},
+                                Vector3(0.5f, 0.5f, 0.5f), .5f},
                         {Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.9f, 0.9f, 0.9f),      .1f},
+                                Vector3(0.9f, 0.9f, 0.9f), .1f},
                         {Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.1f, 0.1f, 0.1f),      .9f},
+                                Vector3(0.1f, 0.1f, 0.1f), .9f},
                         {Vector4(.5f, .5f, .5f, .5f),
-                                Vector3(0.5f, 0.5f, 0.5f),      .1f},
+                                Vector3(0.5f, 0.5f, 0.5f), .1f},
                         {Vector4(.5f, .5f, .5f, 1.f),
                                 Vector3(0.001f, 0.001, 0.001f), .99f}});
 }
@@ -322,6 +325,7 @@ std::vector<std::shared_ptr<directx_renderer::renderee>> build_renderees() {
         dragon->material = rough;
         dragon->tr.position = Vector3(0.f, 6.f, -5.f);
         dragon->tr.scale = Vector3(0.25f, 0.25f, 0.25f);
+        dragon->skin_matrix = 0;
         renderees.emplace_back(dragon);
     }
 
