@@ -4,44 +4,27 @@
 
 namespace directx_renderer {
     struct frame_resource {
-        Microsoft::WRL::ComPtr<ID3D12Resource> global;
-        Microsoft::WRL::ComPtr<ID3D12Resource> object_constants;
-        Microsoft::WRL::ComPtr<ID3D12Resource> final_matrices;
+        Microsoft::WRL::ComPtr<ID3D12Resource> frame_global;
+        Microsoft::WRL::ComPtr<ID3D12Resource> object_const;
+        Microsoft::WRL::ComPtr<ID3D12Resource> skin_matrix;
 
-        UINT64 fence;
+        UINT64 fence = 0;
     };
 
     class frame_resource_buffer {
     public:
-        struct buffer_sizes {
-            int buf_cnt;//size of circular buffer
-            int obj_cnt;
-            int skinned_cnt;
-        };
-
         frame_resource_buffer(Microsoft::WRL::ComPtr<ID3D12Device> device,
-                              const buffer_sizes &);
-
-        bool is_waiting(UINT64 last_comp_fence);
-
-        UINT64 fence_in_wait();
-
-        void put(const global_frame &, const std::vector<object_constant> &,
+                              uint8_t buf_size, size_t obj_cnt);
+        bool can_put(UINT64 last_comp_fence);
+        inline UINT64 cur_fence() const { return _resources[_put].fence; }
+        void put(const frame_globals &, const std::vector<object_constant> &,
                  const std::vector<skin_matrix> &, UINT64 fence);
-
-        frame_resource get();
-        frame_resource peek();
+        const frame_resource &peek() const;
+        const frame_resource &get();
 
     private:
-        std::vector<frame_resource> _frame_resources;
-
-        int _write = 0;
-        int _read = 0;
-
-        inline int next_of(int index) const {
-            return (index + 1) % capacity();
-        };
-
-        inline size_t capacity() const { return _frame_resources.size(); };
+        std::vector<frame_resource> _resources;
+        int _put = 0;
+        int _get = 0;
     };
 }

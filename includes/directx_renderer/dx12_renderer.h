@@ -24,11 +24,11 @@ namespace directx_renderer {
         bool windowed;
     };
 
+    const uint32_t OPTION_BLUR = 1 << 0;
+
     class dx12_renderer {
     public:
-        const static int SWAP_CHAIN_BUFFER_COUNT = 2;
         const static int OBJ_CNT = 20;
-        const static int MAX_TEX_CNT = 64;// Should be same with the one in register.hlsl
 
         void init(const window_info &);
 
@@ -89,56 +89,40 @@ namespace directx_renderer {
             wait_cmd_queue_sync();
         }
         void load_texture(const std::string &name, const std::wstring &path);
-        void load_material(const std::vector<std::string> &names, const std::vector<material> &mat);
-        void set_main_camera(std::shared_ptr<camera>);
-
-        void update_frame_resource(const global_frame &gf,
-                                   const std::vector<object_constant> &ocv,
-                                   const std::vector<skin_matrix> &smv);
-//        void update_camera(const camera_buf &);
-//        void update_lights(const light_info &);
-
+        void load_material(const std::vector<std::string> &names,
+                           const std::vector<material> &mat);
         void init_renderees(std::vector<std::shared_ptr<renderee>>);
-        void render();
-        void render(const std::shared_ptr<renderee> &);
+        void update_frame(const frame_globals &,
+                          const std::vector<object_constant> &,
+                          const std::vector<skin_matrix> &);
 
-        void render_begin();
-        void render(const std::vector<render_info> &);
-        void render_end();
+        void render(uint32_t option = 0);
 
     private:
+        enum class root_param : uint8_t {
+            g_scene,
+            g_frame,
+            obj_const,
+            skin_matrix,
+            g_texture,
+            obj_texture,
+            material
+        };
+
         enum class layer : uint8_t {
-            opaque,
-            transparent,
-            mirror,
-            reflection,
-            shadow,
-            billboard,
-            blur_h,
-            blur_v,
-            terrain,
-            skybox,
-            dynamic_shadow,
-            skinned,
-            end
+            opaque, transparent, mirror, reflection, shadow, billboard, blur_h,
+            blur_v, terrain, skybox, dynamic_shadow, skinned, end
         };
 
         enum class shader_type {
             general, blur, terrain, shadow
         };
 
-        enum class cbuffer:uint8_t {
-            global_scene = 0,
-            global_frame,
-            object,
-            final_matrices
-        };
-
-        enum class tbuffer:uint8_t {
-            cube = 0,
-            shadow,
-            object
-        };
+        const static int SWAP_CHAIN_BUFFER_COUNT = 2;
+        const static int FRAME_RESOURCE_BUFFER_SIZE = 3;
+        static const int TABLE_SIZE = 4;
+        static const int TEX_PER_OBJ = 2;
+        static const int TEX_GLOBAL_CNT = 2;
 
         ComPtr<IDXGIFactory> _factory;
         ComPtr<ID3D12Device> _device;
@@ -172,21 +156,21 @@ namespace directx_renderer {
         std::unordered_map<shader_type, ComPtr<ID3D12RootSignature>> _signatures;
 
         //resource
-        static const int TABLE_SIZE = 4;
-
+        std::unique_ptr<frame_resource_buffer> _fres_buffer;
         std::unordered_map<uint32_t, std::unordered_map<std::string, geo_info>> _geo_infos;
         std::unordered_map<uint32_t, std::pair<ComPtr<
                 ID3D12Resource>, D3D12_VERTEX_BUFFER_VIEW>> _vertex_buffers;
         std::unordered_map<uint32_t, std::pair<ComPtr<
                 ID3D12Resource>, D3D12_INDEX_BUFFER_VIEW>> _index_buffers;
         global _global;
-        ComPtr<ID3D12Resource> _global_scene_buffer;//globals set automatically.
-        std::unique_ptr<frame_resource_buffer> _frame_resource_buffer;
+
+        ComPtr<ID3D12Resource> _global_buffer;//globals set automatically.
         ComPtr<ID3D12Resource> _mat_buffer;
+
         std::unordered_map<std::string, int> _mat_ids;
         std::unordered_map<std::string, std::pair<D3D12_SHADER_RESOURCE_VIEW_DESC,
                 ComPtr<ID3D12Resource>>> _textures;
-        ComPtr<ID3D12DescriptorHeap> _texture_desc_heap;
+        ComPtr<ID3D12DescriptorHeap> _tex_desc_heap;
 
 
         //shader
@@ -198,7 +182,6 @@ namespace directx_renderer {
 
         //user modifiable
         std::vector<std::vector<std::shared_ptr<renderee>>> _renderees;
-        std::shared_ptr<camera> _main_camera;
 
         void init_base(const window_info &info);
         void init_cmds();
@@ -207,8 +190,6 @@ namespace directx_renderer {
         void init_dsv(const window_info &);
 
         void init_global_buf();
-        void init_camera_buf();
-        void init_light_buf();
         void init_resources();
         void bind_texture(int obj, const std::string &texture, int regi);
 
@@ -218,7 +199,9 @@ namespace directx_renderer {
         void execute_cmd_list();
         void wait_cmd_queue_sync();
 
-        void render(const render_info &);
+        void render_begin();
+        void render_end(uint32_t option);
+        void render(const std::shared_ptr<renderee> &);
 
         UINT group_size();
 
@@ -230,5 +213,6 @@ namespace directx_renderer {
         void init_terrain_signature();
         void init_shadow_signature();
         D3D12_CPU_DESCRIPTOR_HANDLE shadow_handle();
+        UINT cbv_handle_size();
     };
 }

@@ -21,13 +21,14 @@ namespace directx_renderer {
         renderee_type type;
         std::string name;
         std::string geometry;
-        std::string material;
-        int skin_matrix;
+        std::string texture[2] = {"", ""};
+        int material;
+        transform tr;
+        skin_matrix skin_matrices;
 
     private:
         int id;
         geo_info geo;
-        object_constant constants;
 
         friend class dx12_renderer;
     };
