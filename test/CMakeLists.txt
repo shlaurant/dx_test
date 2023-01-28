@@ -5,6 +5,6 @@ add_executable(${PROJECT_NAME} WIN32 ${SRC_FILES})
 
 target_link_libraries(${PROJECT_NAME} directx_renderer)
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/includes)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/includes ${CMAKE_SOURCE_DIR}/includes/test)
 
 add_definitions(-DUNICODE)
