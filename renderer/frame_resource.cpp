@@ -4,7 +4,7 @@
 namespace directx_renderer {
 
     frame_resource_buffer::frame_resource_buffer(
-            Microsoft::WRL::ComPtr<ID3D12Device> device,
+            const Microsoft::WRL::ComPtr<ID3D12Device> &device,
             const frame_resource_size &size) : _resources(
             std::vector<frame_resource>(size.buf_size)) {
         for (auto &e: _resources) {
@@ -14,6 +14,8 @@ namespace directx_renderer {
                     create_const_buffer<object_constant>(size.obj_cnt, device);
             e.skin_matrix =
                     create_const_buffer<skin_matrix>(size.skin_cnt, device);
+            device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+                                           IID_PPV_ARGS(&e.cmd_alloc));
         }
     }
 

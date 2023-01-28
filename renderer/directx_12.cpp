@@ -263,9 +263,10 @@ namespace directx_renderer {
     }
 
     void dx12_renderer::render_begin() {
-        ThrowIfFailed(_cmd_list->Reset(_cmd_alloc.Get(), nullptr))
-
         const auto &fres = _fres_buffer->peek();
+
+        ThrowIfFailed(fres.cmd_alloc->Reset());
+        ThrowIfFailed(_cmd_list->Reset(fres.cmd_alloc.Get(), nullptr));
 
         _cmd_list->SetGraphicsRootSignature(
                 _signatures[shader_type::general].Get());

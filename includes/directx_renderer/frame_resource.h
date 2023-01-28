@@ -9,6 +9,7 @@ namespace directx_renderer {
         Microsoft::WRL::ComPtr<ID3D12Resource> skin_matrix;
 
         UINT64 fence = 0;
+        Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmd_alloc;
     };
 
     struct frame_resource_size {
@@ -19,7 +20,8 @@ namespace directx_renderer {
 
     class frame_resource_buffer {
     public:
-        frame_resource_buffer(Microsoft::WRL::ComPtr<ID3D12Device> device,const frame_resource_size &size);
+        frame_resource_buffer(const Microsoft::WRL::ComPtr<ID3D12Device> &,
+                              const frame_resource_size &);
         bool can_put(UINT64 last_comp_fence);
         inline UINT64 cur_fence() const { return _resources[_put].fence; }
         void put(const frame_globals &, const std::vector<object_constant> &,
