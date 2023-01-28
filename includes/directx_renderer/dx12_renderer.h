@@ -95,7 +95,7 @@ namespace directx_renderer {
         void load_texture(const std::string &name, const std::wstring &path);
         void load_material(const std::vector<std::string> &names,
                            const std::vector<material> &mat);
-        void init_renderees(std::vector<std::shared_ptr<renderee>>);
+        void init_renderees(const std::vector<std::shared_ptr<renderee>> &);
         void update_frame(const frame_globals &,
                           const std::vector<object_constant> &,
                           const std::vector<skin_matrix> &);

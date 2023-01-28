@@ -53,7 +53,7 @@ namespace directx_renderer {
     }
 
     void
-    dx12_renderer::init_renderees(std::vector<std::shared_ptr<renderee>> vec) {
+    dx12_renderer::init_renderees(const std::vector<std::shared_ptr<renderee>> &vec) {
         _renderees.clear();
         _renderees.resize(static_cast<uint8_t>(renderee_type::count));
 
