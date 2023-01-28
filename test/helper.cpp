@@ -556,10 +556,20 @@ look_vector(std::shared_ptr<directx_renderer::camera> &p) {
                                                p->tr.translation_matrix())};
 }
 
+DirectX::SimpleMath::Vector3 look_vector(const directx_renderer::camera &c) {
+    return {Vector4::Transform(Vector4::UnitZ, c.tr.rotation_matrix() *
+                                               c.tr.translation_matrix())};
+}
+
 DirectX::SimpleMath::Vector3
 right_vector(std::shared_ptr<directx_renderer::camera> &p) {
     return {Vector4::Transform(Vector4::UnitX, p->tr.rotation_matrix() *
                                                p->tr.translation_matrix())};
+}
+
+DirectX::SimpleMath::Vector3 right_vector(const directx_renderer::camera &c) {
+    return {Vector4::Transform(Vector4::UnitX, c.tr.rotation_matrix() *
+                                               c.tr.translation_matrix())};
 }
 
 

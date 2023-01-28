@@ -68,7 +68,9 @@ private:
 DirectX::SimpleMath::Matrix conv_mat(const FbxMatrix &);
 
 DirectX::SimpleMath::Vector3 look_vector(std::shared_ptr<directx_renderer::camera> &);
+DirectX::SimpleMath::Vector3 look_vector(const directx_renderer::camera &);
 DirectX::SimpleMath::Vector3 right_vector(std::shared_ptr<directx_renderer::camera> &);
+DirectX::SimpleMath::Vector3 right_vector(const directx_renderer::camera &);
 
 void handle_input(Input &, std::shared_ptr<directx_renderer::camera> &,
                   const GameTimer &);
