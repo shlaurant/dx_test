@@ -114,8 +114,8 @@ namespace directx_renderer {
         };
 
         enum class layer : uint8_t {
-            opaque, transparent, mirror, reflection, shadow, billboard, blur_h,
-            blur_v, terrain, skybox, dynamic_shadow, skinned, end
+            opaque, skinned, transparent, mirror, reflection, shadow, billboard, blur_h,
+            blur_v, terrain, skybox, dynamic_shadow, dynamic_shadow_skinned, end
         };
 
         enum class shader_type {

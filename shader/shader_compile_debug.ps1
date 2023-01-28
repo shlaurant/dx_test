@@ -22,4 +22,5 @@ fxc "skybox.hlsl" /Od /Zi /T vs_5_1 /E "VS" /Fo "debug/vs_skybox.cso"
 fxc "skybox.hlsl" /Od /Zi /T ps_5_1 /E "PS" /Fo "debug/ps_skybox.cso"
 
 fxc "shadow.hlsl" /Od /Zi /T vs_5_1 /E "VS" /Fo "debug/vs_shadow.cso"
+fxc "shadow.hlsl" /D SKINNED /Od /Zi /T vs_5_1 /E "VS" /Fo "debug/vs_shadow_skin.cso"
 fxc "shadow.hlsl" /Od /Zi /T ps_5_1 /E "PS" /Fo "debug/ps_shadow.cso"

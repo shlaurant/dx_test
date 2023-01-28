@@ -53,7 +53,8 @@ namespace directx_renderer {
     }
 
     void
-    dx12_renderer::init_renderees(const std::vector<std::shared_ptr<renderee>> &vec) {
+    dx12_renderer::init_renderees(
+            const std::vector<std::shared_ptr<renderee>> &vec) {
         _renderees.clear();
         _renderees.resize(static_cast<uint8_t>(renderee_type::count));
 
@@ -312,11 +313,14 @@ namespace directx_renderer {
                 render(e);
             }
 
-            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::translucent)]) {
                 render(e);
             }
 
-            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::translucent)]) {
+            _cmd_list->SetPipelineState(
+                    _pso_list[static_cast<uint8_t>(layer::dynamic_shadow_skinned)].Get());
+
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
                 render(e);
             }
 
@@ -834,7 +838,9 @@ namespace directx_renderer {
                                                                    &_pso_list[static_cast<uint8_t>(layer::skybox)])));
 
         auto vs_shadow = DX::ReadData(L"shader\\vs_shadow.cso");
+        auto vs_shadow_skin = DX::ReadData(L"shader\\vs_shadow_skin.cso");
         auto ps_shadow = DX::ReadData(L"shader\\ps_shadow.cso");
+
         auto d_shadow_pso = pipeline_state::dynamic_shadow_desc(ie_desc,
                                                                 _countof(
                                                                         ie_desc),
@@ -844,6 +850,16 @@ namespace directx_renderer {
         ThrowIfFailed(_device->CreateGraphicsPipelineState(&d_shadow_pso,
                                                            IID_PPV_ARGS(
                                                                    &_pso_list[static_cast<uint8_t>(layer::dynamic_shadow)])));
+
+        auto d_shadow_skin_pso = pipeline_state::dynamic_shadow_desc(ie_desc,
+                                                                     _countof(
+                                                                             ie_desc),
+                                                                     _signatures[shader_type::general].Get(),
+                                                                     vs_shadow_skin,
+                                                                     ps_shadow);
+        ThrowIfFailed(_device->CreateGraphicsPipelineState(&d_shadow_skin_pso,
+                                                           IID_PPV_ARGS(
+                                                                   &_pso_list[static_cast<uint8_t>(layer::dynamic_shadow_skinned)])));
 
         auto vs_skin = DX::ReadData(L"shader\\vs_skin.cso");
         auto skin_pso = pipeline_state::default_desc(ie_desc,

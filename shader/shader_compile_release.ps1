@@ -22,4 +22,5 @@ fxc "skybox.hlsl"  /T vs_5_1 /E "VS" /Fo "release/vs_skybox.cso"
 fxc "skybox.hlsl"  /T ps_5_1 /E "PS" /Fo "release/ps_skybox.cso"
 
 fxc "shadow.hlsl"  /T vs_5_1 /E "VS" /Fo "release/vs_shadow.cso"
+fxc "shadow.hlsl" /D SKINNED /T vs_5_1 /E "VS" /Fo "release/vs_shadow_skin.cso"
 fxc "shadow.hlsl"  /T ps_5_1 /E "PS" /Fo "release/ps_shadow.cso"
