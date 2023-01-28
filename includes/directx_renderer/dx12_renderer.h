@@ -114,8 +114,20 @@ namespace directx_renderer {
         };
 
         enum class layer : uint8_t {
-            opaque, skinned, transparent, mirror, reflection, shadow, billboard, blur_h,
-            blur_v, terrain, skybox, dynamic_shadow, dynamic_shadow_skinned, end
+            opaque,
+            skinned,
+            transparent,
+            mirror,
+            reflection,
+            shadow,
+            billboard,
+            blur_h,
+            blur_v,
+            terrain,
+            skybox,
+            dynamic_shadow,
+            dynamic_shadow_skinned,
+            end
         };
 
         enum class shader_type {
@@ -185,7 +197,8 @@ namespace directx_renderer {
         shadow_map _shadow_map;
 
         //user modifiable
-        std::vector<std::vector<std::shared_ptr<renderee>>> _renderees;
+        std::vector<std::vector<std::shared_ptr<renderee>>> _renderees = std::vector<std::vector<std::shared_ptr<renderee>>>(
+                static_cast<uint8_t>(renderee_type::count));
 
         void init_base(const window_info &info);
         void init_cmds();

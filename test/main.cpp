@@ -3,11 +3,11 @@
 
 #include "directx_renderer.h"
 #include "debug.h"
-#include "helper.h"
 #include "Input.h"
 #include "GameTimer.h"
 #include "FBXLoader.h"
 #include "default_test.h"
+#include "mem_leak_test.h"
 
 using namespace DirectX::SimpleMath;
 
@@ -62,7 +62,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     ShowWindow(hwnd, nCmdShow);
 
     MSG msg = {};
-    default_test app;
+    mem_leak_test app;
 
     try {
         input = std::make_shared<Input>();
