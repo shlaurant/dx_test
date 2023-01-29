@@ -7,6 +7,7 @@ include_directories(PUBLIC ${CMAKE_SOURCE_DIR}/includes ${CMAKE_SOURCE_DIR}/incl
 
 add_executable(default_test WIN32 default_test.cpp ${SRC_FILES})
 add_executable(memleak_test WIN32 memleak_test.cpp ${SRC_FILES})
+add_executable(clean_test WIN32 clean_test.cpp ${SRC_FILES})
 
 
 add_definitions(-DUNICODE)

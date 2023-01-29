@@ -40,7 +40,7 @@ void default_test::update(float delta) {
     light_cam.tr.position = center + (-light_vec * 2) * 10.f;
     light_cam.tr.rotation.x = DirectX::XM_PI / 4.f;
     auto view = light_cam.view();
-    auto proj = DirectX::XMMatrixOrthographicLH(80.f, 80.f, 1.f,
+    auto proj = DirectX::XMMatrixOrthographicLH(160.f, 160.f, 1.f,
                                                 100.f);
     Matrix ndc_to_uv = {.5f, .0f, .0f, .0f,
                         .0f, -.5f, .0f, .0f,
@@ -80,7 +80,7 @@ void default_test::create_geometries() {
     skull.names.push_back("skull");
     _geometries.emplace_back(skull);
 
-    auto terrain = create_terrain(20, 2);
+    auto terrain = create_terrain(20, 4);
     terrain.names.push_back("terrain");
     _geometries.emplace_back(terrain);
 
@@ -133,7 +133,7 @@ void default_test::build_renderees() {
     skull0->material = def;
     {
         directx_renderer::transform tr;
-        tr.scale = Vector3(.5f, .5f, .5f);
+        tr.scale = Vector3(1.f, 1.f, 1.f);
         tr.position = Vector3(-5.f, 6.f, 3.f);
         _trv.push_back(tr);
     }
@@ -148,7 +148,7 @@ void default_test::build_renderees() {
     skull1->material = rough;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(-12.f, 1.f, 3.f);
+        tr.position = Vector3(-12.f, 6.f, 3.f);
         _trv.push_back(tr);
     }
     _renderees.emplace_back(skull1);
@@ -162,7 +162,7 @@ void default_test::build_renderees() {
     skull2->material = metal;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(-19.f, 1.f, 3.f);
+        tr.position = Vector3(-19.f, 6.f, 3.f);
         _trv.push_back(tr);
     }
     _renderees.emplace_back(skull2);
@@ -176,7 +176,7 @@ void default_test::build_renderees() {
     skull3->material = glass;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(-26.f, 1.f, 3.f);
+        tr.position = Vector3(-26.f, 6.f, 3.f);
         _trv.push_back(tr);
     }
     _renderees.emplace_back(skull3);
@@ -201,12 +201,12 @@ void default_test::build_renderees() {
     cube0->texture[0] = "marble_diffuse";
     cube0->texture[1] = "marble_normal";
     cube0->material = def;
-    {
-        directx_renderer::transform tr;
-        tr.position = Vector3(3.f, 20.f, 3.f);
-        _trv.push_back(tr);
-    }
-    _renderees.emplace_back(cube0);
+//    {
+//        directx_renderer::transform tr;
+//        tr.position = Vector3(3.f, 20.f, 3.f);
+//        _trv.push_back(tr);
+//    }
+//    _renderees.emplace_back(cube0);
 
     auto tree_billboard = std::make_shared<directx_renderer::renderee>();
     tree_billboard->name = "tree_billboard";
@@ -277,7 +277,7 @@ void default_test::build_renderees() {
     dragon0->material = rough;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(0.f, 6.f, -5.f);
+        tr.position = Vector3(15.f, 4.f, -5.f);
         tr.scale = Vector3(0.25f, 0.25f, 0.25f);
         _trv.push_back(tr);
     }
@@ -293,7 +293,7 @@ void default_test::build_renderees() {
     dragon1->material = rough;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(0.f, 6.f, -5.f);
+        tr.position = Vector3(15.f, 4.f, -5.f);
         tr.scale = Vector3(0.25f, 0.25f, 0.25f);
         _trv.push_back(tr);
     }
@@ -309,7 +309,7 @@ void default_test::build_renderees() {
     dragon2->material = rough;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(0.f, 6.f, -5.f);
+        tr.position = Vector3(15.f, 4.f, -5.f);
         tr.scale = Vector3(0.25f, 0.25f, 0.25f);
         _trv.push_back(tr);
     }
