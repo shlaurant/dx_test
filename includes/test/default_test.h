@@ -15,6 +15,7 @@ private:
     directx_renderer::light_info _light_info;
     std::vector<directx_renderer::geometry<directx_renderer::vertex>> _geometries;
     animator _animator;
+    bool _blur = false;
 
     void create_geometries();
     void create_light_info();

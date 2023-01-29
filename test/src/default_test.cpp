@@ -2,7 +2,8 @@
 
 using namespace DirectX::SimpleMath;
 
-void default_test::init(const directx_renderer::window_info &info, std::shared_ptr<Input> input) {
+void default_test::init(const directx_renderer::window_info &info,
+                        std::shared_ptr<Input> input) {
     _input = input;
     _input->Init(info.hwnd);
     _renderer.init(info);
@@ -20,7 +21,7 @@ void default_test::init(const directx_renderer::window_info &info, std::shared_p
     _camera.tr.position.y = 5.f;
     _ocv.resize(_renderees.size());
     _smv.resize(1);
-    for(auto &e : _smv){
+    for (auto &e: _smv) {
         _animator.final_matrices_after(0.f, e);
     }
 }
@@ -60,7 +61,8 @@ void default_test::update(float delta) {
 }
 
 void default_test::draw() {
-    _renderer.render();
+    if (_blur)_renderer.render(directx_renderer::OPTION_BLUR);
+    else _renderer.render();
 }
 
 void default_test::create_geometries() {
@@ -100,24 +102,26 @@ void default_test::create_geometries() {
 }
 
 void default_test::create_light_info() {
-        _frame_globals.light_count = 2;
+    _frame_globals.light_count = 2;
 
-        _frame_globals.lights[0].type = 0;
-        _frame_globals.lights[0].color = DirectX::SimpleMath::Vector3(1.f, 1.f, 1.f);
-        _frame_globals.lights[0].fo_start;
-        _frame_globals.lights[0].direction = Vector3(0.f, -1.f, 1.f);
-        _frame_globals.lights[0].direction.Normalize();
-        _frame_globals.lights[0].fo_end;
-        _frame_globals.lights[0].position;
-        _frame_globals.lights[0].spot_pow;
+    _frame_globals.lights[0].type = 0;
+    _frame_globals.lights[0].color = DirectX::SimpleMath::Vector3(1.f, 1.f,
+                                                                  1.f);
+    _frame_globals.lights[0].fo_start;
+    _frame_globals.lights[0].direction = Vector3(0.f, -1.f, 1.f);
+    _frame_globals.lights[0].direction.Normalize();
+    _frame_globals.lights[0].fo_end;
+    _frame_globals.lights[0].position;
+    _frame_globals.lights[0].spot_pow;
 
-        _frame_globals.lights[1].type = 3;
-        _frame_globals.lights[1].color = DirectX::SimpleMath::Vector3(.4f, .4f, .4f);
-        _frame_globals.lights[1].fo_start;
-        _frame_globals.lights[1].direction;
-        _frame_globals.lights[1].fo_end;
-        _frame_globals.lights[1].position;
-        _frame_globals.lights[1].spot_pow;
+    _frame_globals.lights[1].type = 3;
+    _frame_globals.lights[1].color = DirectX::SimpleMath::Vector3(.4f, .4f,
+                                                                  .4f);
+    _frame_globals.lights[1].fo_start;
+    _frame_globals.lights[1].direction;
+    _frame_globals.lights[1].fo_end;
+    _frame_globals.lights[1].position;
+    _frame_globals.lights[1].spot_pow;
 }
 
 void default_test::build_renderees() {
@@ -322,14 +326,14 @@ void default_test::load_geometries() {
     geo1.resize(1);
     geo1[0].indices.resize(1);
     geo1[0].names.push_back("billboard");
-    geo1[0].vertices = {{Vector3(0.0f, 0.0f, 0.f), Vector2(6.f, 6.f)},
-                        {Vector3(6.0f, 0.0f, 0.f), Vector2(6.f, 6.f)},
-                        {Vector3(12.0f, 0.0f, 0.f), Vector2(6.f, 6.f)},
-                        {Vector3(0.0f, 0.0f, 6.f), Vector2(6.f, 6.f)},
-                        {Vector3(6.0f, 0.0f, 6.f), Vector2(6.f, 6.f)},
-                        {Vector3(12.0f, 0.0f, 6.f), Vector2(6.f, 6.f)},
-                        {Vector3(0.0f, 0.0f, 12.f), Vector2(6.f, 6.f)},
-                        {Vector3(6.0f, 0.0f, 12.f), Vector2(6.f, 6.f)},
+    geo1[0].vertices = {{Vector3(0.0f, 0.0f, 0.f),   Vector2(6.f, 6.f)},
+                        {Vector3(6.0f, 0.0f, 0.f),   Vector2(6.f, 6.f)},
+                        {Vector3(12.0f, 0.0f, 0.f),  Vector2(6.f, 6.f)},
+                        {Vector3(0.0f, 0.0f, 6.f),   Vector2(6.f, 6.f)},
+                        {Vector3(6.0f, 0.0f, 6.f),   Vector2(6.f, 6.f)},
+                        {Vector3(12.0f, 0.0f, 6.f),  Vector2(6.f, 6.f)},
+                        {Vector3(0.0f, 0.0f, 12.f),  Vector2(6.f, 6.f)},
+                        {Vector3(6.0f, 0.0f, 12.f),  Vector2(6.f, 6.f)},
                         {Vector3(12.0f, 0.0f, 12.f), Vector2(6.f, 6.f)}};
     geo1[0].indices[0].emplace_back(0);
     geo1[0].indices[0].emplace_back(1);
@@ -347,16 +351,16 @@ void default_test::load_geometries() {
 
 void default_test::load_materials() {
     _renderer.load_material({"default", "metal", "rough", "glass", "terrain"},
-                       {{Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.5f, 0.5f, 0.5f),      .5f},
-                        {Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.9f, 0.9f, 0.9f),      .1f},
-                        {Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.1f, 0.1f, 0.1f),      .9f},
-                        {Vector4(.5f, .5f, .5f, .5f),
-                                Vector3(0.5f, 0.5f, 0.5f),      .1f},
-                        {Vector4(.5f, .5f, .5f, 1.f),
-                                Vector3(0.001f, 0.001, 0.001f), .99f}});
+                            {{Vector4(.5f, .5f, .5f, 1.f),
+                                     Vector3(0.5f, 0.5f, 0.5f),      .5f},
+                             {Vector4(.5f, .5f, .5f, 1.f),
+                                     Vector3(0.9f, 0.9f, 0.9f),      .1f},
+                             {Vector4(.5f, .5f, .5f, 1.f),
+                                     Vector3(0.1f, 0.1f, 0.1f),      .9f},
+                             {Vector4(.5f, .5f, .5f, .5f),
+                                     Vector3(0.5f, 0.5f, 0.5f),      .1f},
+                             {Vector4(.5f, .5f, .5f, 1.f),
+                                     Vector3(0.001f, 0.001, 0.001f), .99f}});
 }
 
 void default_test::load_textures() {
@@ -412,5 +416,9 @@ void default_test::handle_input(float delta) {
     if (_input->GetButton(KEY_TYPE::D)) {
         _camera.tr.position +=
                 right_vector(_camera) * speed_c * delta;
+    }
+
+    if (_input->GetButtonUp(KEY_TYPE::Q)) {
+        _blur = !_blur;
     }
 }
