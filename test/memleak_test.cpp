@@ -62,7 +62,7 @@ WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine,
     ShowWindow(hwnd, nCmdShow);
 
     MSG msg = {};
-    default_test app;
+    mem_leak_test app;
 
     try {
         input = std::make_shared<Input>();
