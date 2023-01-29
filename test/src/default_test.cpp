@@ -216,7 +216,7 @@ void default_test::build_renderees() {
     tree_billboard->material = rough;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(0.f, 6.f, 10.f);
+        tr.position = Vector3(-26.f, 4.f, 15.f);
         _trv.push_back(tr);
     }
     _renderees.emplace_back(tree_billboard);
@@ -321,15 +321,25 @@ void default_test::load_geometries() {
     std::vector<directx_renderer::geometry<directx_renderer::vertex_billboard>> geo1;
     geo1.resize(1);
     geo1[0].indices.resize(1);
-    directx_renderer::vertex_billboard v{Vector3(0.0f, 0.0f, 0.f),
-                                         Vector2(1.f, 1.f)};
     geo1[0].names.push_back("billboard");
-    geo1[0].vertices = {{Vector3(0.0f, 0.0f, 0.f), Vector2(1.f, 1.f)},
-                        {Vector3(1.0f, 0.0f, 0.f), Vector2(1.5f, 1.5f)},
-                        {Vector3(2.0f, 0.0f, 0.f), Vector2(1.f, 1.f)}};
+    geo1[0].vertices = {{Vector3(0.0f, 0.0f, 0.f), Vector2(6.f, 6.f)},
+                        {Vector3(6.0f, 0.0f, 0.f), Vector2(6.f, 6.f)},
+                        {Vector3(12.0f, 0.0f, 0.f), Vector2(6.f, 6.f)},
+                        {Vector3(0.0f, 0.0f, 6.f), Vector2(6.f, 6.f)},
+                        {Vector3(6.0f, 0.0f, 6.f), Vector2(6.f, 6.f)},
+                        {Vector3(12.0f, 0.0f, 6.f), Vector2(6.f, 6.f)},
+                        {Vector3(0.0f, 0.0f, 12.f), Vector2(6.f, 6.f)},
+                        {Vector3(6.0f, 0.0f, 12.f), Vector2(6.f, 6.f)},
+                        {Vector3(12.0f, 0.0f, 12.f), Vector2(6.f, 6.f)}};
     geo1[0].indices[0].emplace_back(0);
     geo1[0].indices[0].emplace_back(1);
     geo1[0].indices[0].emplace_back(2);
+    geo1[0].indices[0].emplace_back(3);
+    geo1[0].indices[0].emplace_back(4);
+    geo1[0].indices[0].emplace_back(5);
+    geo1[0].indices[0].emplace_back(6);
+    geo1[0].indices[0].emplace_back(7);
+    geo1[0].indices[0].emplace_back(8);
 
     _renderer.init_geometries<directx_renderer::vertex>(_geometries);
     _renderer.init_geometries<directx_renderer::vertex_billboard>(geo1);
