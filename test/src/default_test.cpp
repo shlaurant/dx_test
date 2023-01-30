@@ -207,10 +207,10 @@ void default_test::build_renderees() {
     tree_billboard->type = directx_renderer::renderee_type::billboard;
     tree_billboard->geometry = "billboard";
     tree_billboard->texture[0] = "tree_arr";
-    tree_billboard->material = rough;
+    tree_billboard->material = ter;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(-26.f, 4.f, 15.f);
+        tr.position = Vector3(-26.f, 5.f, -20.f);
         _trv.push_back(tr);
     }
     _renderees.emplace_back(tree_billboard);
