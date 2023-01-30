@@ -362,7 +362,7 @@ void default_test::load_materials() {
     _renderer.load_material({"default", "metal", "rough", "glass", "terrain"},
                             {{Vector4(.5f, .5f, .5f, 1.f),
                                      Vector3(0.5f, 0.5f, 0.5f),      .5f},
-                             {Vector4(.5f, .5f, .5f, 1.f),
+                             {Vector4(.1f, .1f, .1f, 1.f),
                                      Vector3(0.9f, 0.9f, 0.9f),      .1f},
                              {Vector4(.5f, .5f, .5f, 1.f),
                                      Vector3(0.1f, 0.1f, 0.1f),      .9f},

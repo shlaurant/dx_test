@@ -2,9 +2,9 @@
 #include "register.hlsl"
 #include "util.hlsl"
 
-#define DIST_MAX 50.f
+#define DIST_MAX 100.f
 #define DIST_MIN 5.f
-#define TESS_MAX 3.f
+#define TESS_MAX 5.f
 #define TESS_MIN 1.f
 #define DELTA_FOR_NORMAL 0.01f
 #define HEIGHT_CONST 80.f
