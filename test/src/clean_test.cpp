@@ -14,7 +14,7 @@ void clean_test::init(const directx_renderer::window_info &info,
     terrain.names = {"mountain"};
     geometries.emplace_back(terrain);
 
-    _renderer.init_geometries<vertex>(geometries);
+    _renderer.load_geometries<vertex>(geometries);
 
     _renderer.load_texture("mountain_diffuse", L"resource\\mountain_d.png");
     _renderer.load_texture("mountain_diffuse", L"resource\\mountain_d.png");

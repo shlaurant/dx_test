@@ -34,7 +34,7 @@ namespace directx_renderer {
         void init(const window_info &);
 
         template<typename T>
-        void init_geometries(std::vector<geometry<T>> &geometries) {
+        void load_geometries(std::vector<geometry<T>> &geometries) {
             ThrowIfFailed(_cmd_alloc->Reset());
             ThrowIfFailed(_cmd_list->Reset(_cmd_alloc.Get(), nullptr));
 

@@ -354,8 +354,8 @@ void default_test::load_geometries() {
     geo1[0].indices[0].emplace_back(7);
     geo1[0].indices[0].emplace_back(8);
 
-    _renderer.init_geometries<directx_renderer::vertex>(_geometries);
-    _renderer.init_geometries<directx_renderer::vertex_billboard>(geo1);
+    _renderer.load_geometries<directx_renderer::vertex>(_geometries);
+    _renderer.load_geometries<directx_renderer::vertex_billboard>(geo1);
 }
 
 void default_test::load_materials() {
