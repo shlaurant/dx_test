@@ -163,22 +163,29 @@ namespace directx_renderer {
             render(e);
         }
 
-        _cmd_list->OMSetStencilRef(1);
-        _cmd_list->SetPipelineState(_pso_list[static_cast<uint8_t>(layer::mirror)].Get());
+        if (_renderees[static_cast<uint8_t>(renderee_type::mirror)].size() >
+            0) {
 
-        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::mirror)]) {
-            render(e);
-        }
+            _cmd_list->OMSetStencilRef(1);
+            _cmd_list->SetPipelineState(
+                    _pso_list[static_cast<uint8_t>(layer::mirror)].Get());
 
-        _cmd_list->SetPipelineState(_pso_list[static_cast<uint8_t>(layer::reflection)].Get());
-        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque)]) {
-            render(e);
-        }
-        _cmd_list->OMSetStencilRef(0);
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::mirror)]) {
+                render(e);
+            }
 
-        _cmd_list->SetPipelineState(_pso_list[static_cast<uint8_t>(layer::transparent)].Get());
-        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::mirror)]) {
-            render(e);
+            _cmd_list->SetPipelineState(
+                    _pso_list[static_cast<uint8_t>(layer::reflection)].Get());
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque)]) {
+                render(e);
+            }
+            _cmd_list->OMSetStencilRef(0);
+
+            _cmd_list->SetPipelineState(
+                    _pso_list[static_cast<uint8_t>(layer::transparent)].Get());
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::mirror)]) {
+                render(e);
+            }
         }
 
         render_end(option);
