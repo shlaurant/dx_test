@@ -418,35 +418,30 @@ directx_renderer::geometry<directx_renderer::vertex>
 create_plain(float width, float height) {
     directx_renderer::geometry<directx_renderer::vertex> ret;
 
+        auto normal = Vector3::Forward;
+        Vector3 tangent(1.f, 0.f, 0.f);
+
     {
         Vector3 pos(-width/2.f, height/2.f, 0.f);
         Vector2 uv(0.f, 0.f);
-        Vector3 normal(0.f, 0.f, -1.f);
-        Vector3 tangent(1.f, 0.f, 0.f);
         ret.vertices.push_back({pos, uv, normal, tangent});
     }
 
     {
         Vector3 pos(width/2.f, height/2.f, 0.f);
         Vector2 uv(1.f, 0.f);
-        Vector3 normal(0.f, 0.f, -1.f);
-        Vector3 tangent(1.f, 0.f, 0.f);
         ret.vertices.push_back({pos, uv, normal, tangent});
     }
 
     {
         Vector3 pos(-width/2.f, -height/2.f, 0.f);
         Vector2 uv(0.f, 1.f);
-        Vector3 normal(0.f, 0.f, -1.f);
-        Vector3 tangent(1.f, 0.f, 0.f);
         ret.vertices.push_back({pos, uv, normal, tangent});
     }
 
     {
         Vector3 pos(width/2.f, -height/2.f, 0.f);
         Vector2 uv(1.f, 1.f);
-        Vector3 normal(0.f, 0.f, -1.f);
-        Vector3 tangent(1.f, 0.f, 0.f);
         ret.vertices.push_back({pos, uv, normal, tangent});
     }
 
