@@ -312,16 +312,21 @@ void default_test::build_renderees() {
 
     auto mirror = std::make_shared<directx_renderer::renderee>();
     mirror->name = "mirror";
-    mirror->type = directx_renderer::renderee_type::opaque;
+    mirror->type = directx_renderer::renderee_type::mirror;
     mirror->geometry = "mirror";
-    mirror->texture[0] = "kyaru";
-    mirror->material = def;
+    mirror->texture[0] = "white";
+    mirror->texture[1] = "default_normal";
+    mirror->material = glass;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(15.f, 10.f, 10.f);
+        tr.position = Vector3(-20.f, 10.f, 10.f);
         tr.scale = Vector3(1.f, 1.f, 1.f);
-        tr.rotation.x = DirectX::XM_PI/4.f;
         _trv.push_back(tr);
+        auto n = Vector3::Transform(Vector3::Backward, tr.world_matrix());
+        n.Normalize();
+        auto p = Plane(tr.position, n);
+        _frame_globals.reflection_matrices[0] = Matrix::CreateReflection(p);
+        _frame_globals.ref_cnt = 1;
     }
     mirror->skin_matrix = 0;
     _renderees.emplace_back(mirror);

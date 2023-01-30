@@ -1,11 +1,10 @@
 #ifndef GUARD_REGISTER
 #define GUARD_REGISTER
 
+#define MAX_REF_CNT 10
 #define MAX_BONE_CNT 256
 
 cbuffer globals_scene :register(b0) {
-    row_major float4x4 reflection_matrix[10];
-    int reflection_count;
     float3 pad0;
     row_major float4x4 shadow_matrix;
 };
@@ -17,6 +16,9 @@ cbuffer globals_frame :register(b1) {
     light lights[LIGHT_COUNT];
     row_major float4x4 light_vp;
     row_major float4x4 shadow_uv_matrix;
+    row_major float4x4 reflection_matrix[10];
+    int reflection_count;
+    float3 gf_pad0;
 };
 
 cbuffer object_const :register(b2) {

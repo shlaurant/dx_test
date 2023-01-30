@@ -139,5 +139,8 @@ namespace directx_renderer {
         light lights[50];//should be same with LIGHT_COUNT in shader code
         DirectX::SimpleMath::Matrix light_vp;
         DirectX::SimpleMath::Matrix shadow_uv;
+        DirectX::SimpleMath::Matrix reflection_matrices[10];//should be same with MAX_REF_CNT in shader code
+        int ref_cnt;
+        DirectX::SimpleMath::Vector3 pad0;
     };
 }

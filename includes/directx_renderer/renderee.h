@@ -4,7 +4,7 @@
 
 namespace directx_renderer {
     enum class renderee_type : uint8_t {
-        opaque, translucent, billboard, terrain, skybox, opaque_skinned, count
+        opaque, translucent, billboard, terrain, skybox, opaque_skinned, mirror, count
     };
 
     enum renderee_option {

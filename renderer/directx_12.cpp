@@ -15,6 +15,11 @@ namespace directx_renderer {
                 D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
             debugController->EnableDebugLayer();
         }
+        ComPtr<ID3D12Debug> debugController;
+        if (SUCCEEDED(
+                D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+            debugController->EnableDebugLayer();
+        }
 #endif
 
         init_base(info);
@@ -160,6 +165,24 @@ namespace directx_renderer {
                 _pso_list[static_cast<uint8_t>(layer::transparent)].Get());
 
         for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::translucent)]) {
+            render(e);
+        }
+
+        _cmd_list->OMSetStencilRef(1);
+        _cmd_list->SetPipelineState(_pso_list[static_cast<uint8_t>(layer::mirror)].Get());
+
+        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::mirror)]) {
+            render(e);
+        }
+
+        _cmd_list->SetPipelineState(_pso_list[static_cast<uint8_t>(layer::reflection)].Get());
+        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque)]) {
+            render(e);
+        }
+        _cmd_list->OMSetStencilRef(0);
+
+        _cmd_list->SetPipelineState(_pso_list[static_cast<uint8_t>(layer::transparent)].Get());
+        for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::mirror)]) {
             render(e);
         }
 
