@@ -120,8 +120,14 @@ DS_OUT DS(CHS_OUT patch, float3 location : SV_DomainLocation, const OutputPatch<
     float3 normal = cross(v1, v2);
     normal = normalize(normal);
 
-    output.pos_w = mul(position, w);
-    float4x4 wvp = mul(w, vp);
+    #ifdef REFLECTION
+    float4x4 world = mul(w, reflection_matrix[0]);
+    #else
+    float4x4 world = w;
+    #endif
+
+    output.pos_w = mul(position, world);
+    float4x4 wvp = mul(world, vp);
     output.pos = mul(position, wvp);
     output.uv = uv;
     output.normal = normal;

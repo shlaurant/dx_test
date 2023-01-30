@@ -17,6 +17,7 @@ fxc "blur.hlsl"  /T cs_5_1 /E "CS_Blur_V" /Fo "release/cs_blur_v.cso"
 fxc "terrain.hlsl"  /T vs_5_1 /E "VS" /Fo "release/vs_terrain.cso"
 fxc "terrain.hlsl"  /T hs_5_1 /E "CPHS" /Fo "release/hs_terrain.cso"
 fxc "terrain.hlsl"  /T ds_5_1 /E "DS" /Fo "release/ds_terrain.cso"
+fxc "terrain.hlsl"  /D REFLECTION /T ds_5_1 /E "DS" /Fo "release/ds_terrain_ref.cso"
 fxc "terrain.hlsl"  /T ps_5_1 /E "PS" /Fo "release/ps_terrain.cso"
 
 fxc "skybox.hlsl"  /T vs_5_1 /E "VS" /Fo "release/vs_skybox.cso"

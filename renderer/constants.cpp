@@ -245,6 +245,39 @@ namespace directx_renderer {
     }
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC
+    pipeline_state::terrain_ref_desc(D3D12_INPUT_ELEMENT_DESC *ed, UINT ed_cnt,
+                                     ID3D12RootSignature *rs,
+                                     const std::vector<uint8_t> &vs,
+                                     const std::vector<uint8_t> &hs,
+                                     const std::vector<uint8_t> &ds,
+                                     const std::vector<uint8_t> &ps) {
+        auto ret = terrain_desc(ed, ed_cnt, rs, vs, hs, ds, ps);
+        D3D12_DEPTH_STENCIL_DESC ref_dss = {};
+        ref_dss.DepthEnable = true;
+        ref_dss.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+        ref_dss.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+        ref_dss.StencilEnable = true;
+        ref_dss.StencilReadMask = 0xff;
+        ref_dss.StencilWriteMask = 0xff;
+
+        ref_dss.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_EQUAL;
+        ref_dss.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+        ref_dss.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+        ref_dss.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+
+        ref_dss.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+        ref_dss.BackFace.StencilPassOp = D3D12_STENCIL_OP_REPLACE;
+        ref_dss.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+        ref_dss.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+
+        ret.DepthStencilState = ref_dss;
+        ret.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+        ret.RasterizerState.FrontCounterClockwise = true;
+
+        return ret;
+    }
+
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC
     pipeline_state::skybox_desc(D3D12_INPUT_ELEMENT_DESC *ed, UINT ed_cnt,
                                 ID3D12RootSignature *rs,
                                 const std::vector<uint8_t> &vs,

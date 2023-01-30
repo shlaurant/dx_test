@@ -121,6 +121,7 @@ namespace directx_renderer {
             ref_opaque,
             ref_transparent,
             ref_skinned,
+            ref_terrain,
             shadow,
             billboard,
             blur_h,

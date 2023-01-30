@@ -192,6 +192,21 @@ namespace directx_renderer {
                 render(e);
             }
 
+            _cmd_list->IASetVertexBuffers(0, 1,
+                                          &(_vertex_buffers[type_id<vertex>()].second));
+            _cmd_list->IASetIndexBuffer(
+                    &(_index_buffers[type_id<vertex>()].second));
+            _cmd_list->IASetPrimitiveTopology(
+                    D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+            _cmd_list->SetPipelineState(
+                    _pso_list[static_cast<uint8_t>(layer::terrain)].Get());
+
+            _cmd_list->SetPipelineState(
+                    _pso_list[static_cast<uint8_t>(layer::ref_terrain)].Get());
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::terrain)]) {
+                render(e);
+            }
+
             _cmd_list->OMSetStencilRef(0);
 
             _cmd_list->SetPipelineState(
@@ -861,19 +876,30 @@ namespace directx_renderer {
         auto vs_terrain = DX::ReadData(L"shader\\vs_terrain.cso");
         auto hs_terrain = DX::ReadData(L"shader\\hs_terrain.cso");
         auto ds_terrain = DX::ReadData(L"shader\\ds_terrain.cso");
+        auto ds_terrain_ref = DX::ReadData(L"shader\\ds_terrain_ref.cso");
         auto ps_terrain = DX::ReadData(L"shader\\ps_terrain.cso");
 
-        auto
-                terrain_pso = pipeline_state::terrain_desc(ie_desc,
-                                                           _countof(ie_desc),
-                                                           _signatures[shader_type::general].Get(),
-                                                           vs_terrain,
-                                                           hs_terrain,
-                                                           ds_terrain,
-                                                           ps_terrain);
+        auto terrain_pso = pipeline_state::terrain_desc(ie_desc,
+                                                        _countof(ie_desc),
+                                                        _signatures[shader_type::general].Get(),
+                                                        vs_terrain,
+                                                        hs_terrain,
+                                                        ds_terrain,
+                                                        ps_terrain);
         ThrowIfFailed(_device->CreateGraphicsPipelineState(&terrain_pso,
                                                            IID_PPV_ARGS(
                                                                    &_pso_list[static_cast<uint8_t>(layer::terrain)])));
+
+        auto terrain_ref_pso = pipeline_state::terrain_ref_desc(ie_desc,
+                                                        _countof(ie_desc),
+                                                        _signatures[shader_type::general].Get(),
+                                                        vs_terrain,
+                                                        hs_terrain,
+                                                        ds_terrain_ref,
+                                                        ps_terrain);
+        ThrowIfFailed(_device->CreateGraphicsPipelineState(&terrain_ref_pso,
+                                                           IID_PPV_ARGS(
+                                                                   &_pso_list[static_cast<uint8_t>(layer::ref_terrain)])));
 
         auto vs_skybox = DX::ReadData(L"shader\\vs_skybox.cso");
         auto ps_skybox = DX::ReadData(L"shader\\ps_skybox.cso");

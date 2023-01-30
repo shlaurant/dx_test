@@ -17,6 +17,7 @@ fxc "blur.hlsl" /Od /Zi /T cs_5_1 /E "CS_Blur_V" /Fo "debug/cs_blur_v.cso"
 fxc "terrain.hlsl" /Od /Zi /T vs_5_1 /E "VS" /Fo "debug/vs_terrain.cso"
 fxc "terrain.hlsl" /Od /Zi /T hs_5_1 /E "CPHS" /Fo "debug/hs_terrain.cso"
 fxc "terrain.hlsl" /Od /Zi /T ds_5_1 /E "DS" /Fo "debug/ds_terrain.cso"
+fxc "terrain.hlsl"  /D REFLECTION /Od /Zi /T ds_5_1 /E "DS" /Fo "debug/ds_terrain_ref.cso"
 fxc "terrain.hlsl" /Od /Zi /T ps_5_1 /E "PS" /Fo "debug/ps_terrain.cso"
 
 fxc "skybox.hlsl" /Od /Zi /T vs_5_1 /E "VS" /Fo "debug/vs_skybox.cso"
