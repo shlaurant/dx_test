@@ -74,7 +74,7 @@ void default_test::create_geometries() {
     plane.names.emplace_back("plane");
     _geometries.emplace_back(plane);
 
-    auto mirror = create_plain(30, 20);
+    auto mirror = create_plain(80, 40);
     mirror.names.emplace_back("mirror");
     _geometries.emplace_back(mirror);
 
@@ -181,12 +181,12 @@ void default_test::build_renderees() {
     wire->geometry = "cube";
     wire->texture[0] = "wire";
     wire->material = rough;
-    {
-        directx_renderer::transform tr;
-        tr.position = Vector3(0.f, 6.f, 3.f);
-        _trv.push_back(tr);
-    }
-    _renderees.emplace_back(wire);
+//    {
+//        directx_renderer::transform tr;
+//        tr.position = Vector3(0.f, 6.f, 3.f);
+//        _trv.push_back(tr);
+//    }
+//    _renderees.emplace_back(wire);
 
     auto cube0 = std::make_shared<directx_renderer::renderee>();
     cube0->name = "cube0";
@@ -284,7 +284,7 @@ void default_test::build_renderees() {
     dragon1->geometry = "dragon1_Dragon_Mesh";
     dragon1->texture[0] = "dragon_diffuse";
     dragon1->texture[1] = "dragon_normal";
-    dragon1->material = rough;
+    dragon1->material = def;
     {
         directx_renderer::transform tr;
         tr.position = Vector3(15.f, 4.f, -5.f);
@@ -319,11 +319,10 @@ void default_test::build_renderees() {
     mirror->material = glass;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(-40.f, 20.f, -20.f);
+        tr.position = Vector3(0.f, 20.f, 40.f);
         tr.scale = Vector3(1.f, 1.f, 1.f);
-        tr.rotation.y = -DirectX::XM_PI/2.f;
         _trv.push_back(tr);
-        auto p = Plane(tr.position, Vector3::Right);
+        auto p = Plane(tr.position, Vector3::Forward);
         _frame_globals.reflection_matrices[0] = Matrix::CreateReflection(p);
         _frame_globals.ref_cnt = 0;
     }
