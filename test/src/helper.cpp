@@ -415,33 +415,42 @@ directx_renderer::geometry<directx_renderer::vertex> create_cube_uv() {
 }
 
 directx_renderer::geometry<directx_renderer::vertex>
-create_plain(int width, int height) {
+create_plain(float width, float height) {
     directx_renderer::geometry<directx_renderer::vertex> ret;
-    ret.indices.resize(1);
 
-    auto cnt = (width + 1) * (height + 1);
-    ret.vertices.resize(cnt);
-    for (auto i = 0; i < cnt; ++i) {
-        int x = i % (width + 1);
-        int y = i / (width + 1);
-        ret.vertices[i].position = Vector3(x * 2, y * 2, 0.f);
-        ret.vertices[i].normal = Vector3::Backward;
-        auto ux = x % 2 == 0 ? 0.f : 1.f;
-        auto uy = y % 2 == 0 ? 0.f : 1.f;
-        ret.vertices[i].uv = Vector2(ux, uy);
+    {
+        Vector3 pos(-width/2.f, height/2.f, 0.f);
+        Vector2 uv(0.f, 0.f);
+        Vector3 normal(0.f, 0.f, -1.f);
+        Vector3 tangent(0.f, -.1f, 0.f);
+        ret.vertices.push_back({pos, uv, normal, tangent});
     }
 
-    for (auto i = 0; i < height; ++i) {
-        for (auto j = 0; j < width; ++j) {
-            auto index = (width + 1) * i + j;
-            ret.indices[0].push_back(index);
-            ret.indices[0].push_back(index + width + 1);
-            ret.indices[0].push_back(index + 1);
-            ret.indices[0].push_back(index + width + 1);
-            ret.indices[0].push_back(index + width + 2);
-            ret.indices[0].push_back(index + 1);
-        }
+    {
+        Vector3 pos(width/2.f, height/2.f, 0.f);
+        Vector2 uv(1.f, 0.f);
+        Vector3 normal(0.f, 0.f, -1.f);
+        Vector3 tangent(0.f, -.1f, 0.f);
+        ret.vertices.push_back({pos, uv, normal, tangent});
     }
+
+    {
+        Vector3 pos(-width/2.f, -height/2.f, 0.f);
+        Vector2 uv(0.f, 1.f);
+        Vector3 normal(0.f, 0.f, -1.f);
+        Vector3 tangent(0.f, -.1f, 0.f);
+        ret.vertices.push_back({pos, uv, normal, tangent});
+    }
+
+    {
+        Vector3 pos(width/2.f, -height/2.f, 0.f);
+        Vector2 uv(1.f, 1.f);
+        Vector3 normal(0.f, 0.f, -1.f);
+        Vector3 tangent(0.f, -.1f, 0.f);
+        ret.vertices.push_back({pos, uv, normal, tangent});
+    }
+
+    ret.indices.push_back({0, 1, 2, 1, 3, 2});
 
     return std::move(ret);
 }

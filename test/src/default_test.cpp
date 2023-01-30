@@ -74,7 +74,7 @@ void default_test::create_geometries() {
     plane.names.emplace_back("plane");
     _geometries.emplace_back(plane);
 
-    auto mirror = create_plain(5, 5);
+    auto mirror = create_plain(15, 15);
     mirror.names.emplace_back("mirror");
     _geometries.emplace_back(mirror);
 
@@ -85,16 +85,6 @@ void default_test::create_geometries() {
     auto terrain = create_terrain(20, 4);
     terrain.names.emplace_back("terrain");
     _geometries.emplace_back(terrain);
-
-//    fbx_loader.LoadFbx(L"resource\\male.fbx", "male");
-//    for(const auto &e: fbx_loader.geometries()){
-//        _geometries.emplace_back(e);
-//    }
-//
-//    fbx_loader.LoadFbx(L"resource\\house.fbx", "house");
-//    for(const auto &e : fbx_loader.geometries()){
-//        _geometries.emplace_back(e);
-//    }
 
     for (const auto &e: _dragon_fbx.geometries()) {
         _geometries.emplace_back(e);
@@ -319,6 +309,22 @@ void default_test::build_renderees() {
     }
     dragon2->skin_matrix = 0;
     _renderees.emplace_back(dragon2);
+
+    auto mirror = std::make_shared<directx_renderer::renderee>();
+    mirror->name = "mirror";
+    mirror->type = directx_renderer::renderee_type::opaque;
+    mirror->geometry = "mirror";
+    mirror->texture[0] = "kyaru";
+    mirror->material = def;
+    {
+        directx_renderer::transform tr;
+        tr.position = Vector3(15.f, 10.f, 10.f);
+        tr.scale = Vector3(1.f, 1.f, 1.f);
+        tr.rotation.x = DirectX::XM_PI/4.f;
+        _trv.push_back(tr);
+    }
+    mirror->skin_matrix = 0;
+    _renderees.emplace_back(mirror);
 }
 
 void default_test::load_geometries() {

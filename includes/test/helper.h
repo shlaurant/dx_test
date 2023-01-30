@@ -92,7 +92,7 @@ directx_renderer::geometry<directx_renderer::vertex> create_tetra();
 directx_renderer::geometry<directx_renderer::vertex> create_cube_uv();
 
 directx_renderer::geometry<directx_renderer::vertex>
-create_plain(int width, int height);
+create_plain(float width, float height);
 
 DirectX::SimpleMath::Vector4 white();
 DirectX::SimpleMath::Vector4 red();
