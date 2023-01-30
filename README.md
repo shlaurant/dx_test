@@ -63,7 +63,30 @@
   * 확실한 변화를 보기 위해 현재 partitioning 이 integer로 설정됨
 
 ### Billboard
+![bill](https://user-images.githubusercontent.com/20225459/215463194-2f370ed4-4d1a-46ef-b219-ec62c6417f65.gif)
+* 기하셰이더를 통해서 점 하나만 넣어주면 알아서 사각형 생성
+* 멀리 있는 물체를 표현할 때 사용할것을 생각하고 시선을 따라 돌아감
+
 ### Animation
+![anim](https://user-images.githubusercontent.com/20225459/215463421-98330697-947f-4456-a0c4-24e33c1ec436.gif)
+* 인터넷에 돌아다니는 fbx를 받아 FBXLoader를 이용해 lib에서 사용하는 형태로 변환
+* Debug 모드로 빌드하면 gpu쪽이 느려서 cpu에서 interplation 하게 만들어놨는데 Release로 빌드하니 gpu가 빠른것 같아 넘겨야 되나 고려 중
+
 ### Blur
+![image](https://user-images.githubusercontent.com/20225459/215466507-4b5bde34-ff82-4b60-ac80-928d2f36a3ce.png)
+* 계산 셰이더를 활용한 가우스 블러
+* 비슷한 후처리 효과들을 대비해 render(option:uint32)에서 option으로 선택할 수 있도록 준비해 놓음
+* Q를 눌러 토글 가능
+
 ### Syncronization
+* dx12_renderer::wait_cmd_queue_sync: void
+  * load_texture 등 신 초기화 과정에서 쓰임
+  * gpu가 일을 다 마칠 때 까지 cpu 작업을 하지 않고 기다리는 방식
+* frame_resource 클래스
+  * fence가 첨가된 circular buffer 방식
+  * 버퍼가 다 찰때까지 cpu가 프레임 정보를 계속 밀어 넣을 수 있다
+  * 특정 프레임 정보를 덮어 써도 되는지는 fence 정보를 읽어 판단
+
 ### MSAA4
+* pipeline state object에서 직접 AA값을 박는 방식은 최근 API에 와서 막힌걸로 보인다
+* 직접 백버퍼를 렌더 타겟으로 세팅하지 않고 별도의 해상도 4배 텍스처를 렌더 타겟으로 설정 후, 마지막에 서브리소스 리졸브를 해주는 방식으로 해주어야했다.
