@@ -16,9 +16,9 @@ void default_test::init(const directx_renderer::window_info &info,
     load_materials();
     build_renderees();
     _renderer.init_renderees(_renderees);
-    _camera.tr.rotation.x = DirectX::XM_PI / 4.f;
-    _camera.tr.position.z = -2.f;
-    _camera.tr.position.y = 5.f;
+    _camera.tr.rotation.x = DirectX::XM_PI / 7.f;
+    _camera.tr.position.z = -50.f;
+    _camera.tr.position.y = 40.f;
     _ocv.resize(_renderees.size());
     _smv.resize(1);
     for (auto &e: _smv) {
