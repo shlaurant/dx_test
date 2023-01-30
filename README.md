@@ -80,15 +80,17 @@
 
 ### Public methods
 ```
-template<typename T> void load_geometries(std::vector<geometry<T>> &geometries)
+template<typename T> void load_geometries(std::vector<geometry<T>> &geometries);
 void load_texture(const std::string &name, const std::wstring &path);
 void load_material(const std::vector<std::string> &names, const std::vector<material> &mat);
 void init_renderees(const std::vector<std::shared_ptr<renderee>> &);
 void update_frame(const frame_globals &, const std::vector<object_constant> &, const std::vector<skin_matrix> &);
+void render(uint32_t option = 0);
 ```
 * load_geometries, load_texture, load_material : 신 초기 리소스 바인딩 용
 * init_renderees: renderee struct 를 통해 리소스를 어떻게 묶에서 렌더링 할지 알려준다
 * update_frame: 엔진에서 렌더링 패스에 필요한 값을을 매 프레임 업데이트
+* render: draw 콜. option은 비트마스크 형식으로 활용하나 현재는 blur 옵션만 
 
 
 ### Syncronization
