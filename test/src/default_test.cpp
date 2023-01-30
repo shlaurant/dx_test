@@ -67,23 +67,23 @@ void default_test::draw() {
 
 void default_test::create_geometries() {
     auto cube0 = create_cube_uv();
-    cube0.names.push_back("cube");
+    cube0.names.emplace_back("cube");
     _geometries.emplace_back(cube0);
 
     auto plane = create_plain(100, 100);
-    plane.names.push_back("plane");
+    plane.names.emplace_back("plane");
     _geometries.emplace_back(plane);
 
     auto mirror = create_plain(5, 5);
-    mirror.names.push_back("mirror");
+    mirror.names.emplace_back("mirror");
     _geometries.emplace_back(mirror);
 
     auto skull = load_mesh("resource/skull.txt");
-    skull.names.push_back("skull");
+    skull.names.emplace_back("skull");
     _geometries.emplace_back(skull);
 
     auto terrain = create_terrain(20, 4);
-    terrain.names.push_back("terrain");
+    terrain.names.emplace_back("terrain");
     _geometries.emplace_back(terrain);
 
 //    fbx_loader.LoadFbx(L"resource\\male.fbx", "male");
