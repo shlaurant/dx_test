@@ -74,7 +74,7 @@ void default_test::create_geometries() {
     plane.names.emplace_back("plane");
     _geometries.emplace_back(plane);
 
-    auto mirror = create_plain(30, 30);
+    auto mirror = create_plain(60, 30);
     mirror.names.emplace_back("mirror");
     _geometries.emplace_back(mirror);
 
@@ -319,8 +319,9 @@ void default_test::build_renderees() {
     mirror->material = glass;
     {
         directx_renderer::transform tr;
-        tr.position = Vector3(-20.f, 10.f, 20.f);
+        tr.position = Vector3(0.f, 30.f, 40.f);
         tr.scale = Vector3(1.f, 1.f, 1.f);
+        tr.rotation.x = -DirectX::XM_PI/4.f;
         _trv.push_back(tr);
         auto p = Plane(tr.position, Vector3::Forward);
         _frame_globals.reflection_matrices[0] = Matrix::CreateReflection(p);

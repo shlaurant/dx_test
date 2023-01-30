@@ -175,10 +175,23 @@ namespace directx_renderer {
             }
 
             _cmd_list->SetPipelineState(
-                    _pso_list[static_cast<uint8_t>(layer::reflection)].Get());
+                    _pso_list[static_cast<uint8_t>(layer::ref_opaque)].Get());
             for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque)]) {
                 render(e);
             }
+
+            _cmd_list->SetPipelineState(
+                    _pso_list[static_cast<uint8_t>(layer::ref_transparent)].Get());
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::translucent)]) {
+                render(e);
+            }
+
+            _cmd_list->SetPipelineState(
+                    _pso_list[static_cast<uint8_t>(layer::ref_skinned)].Get());
+            for (const auto &e: _renderees[static_cast<uint8_t>(renderee_type::opaque_skinned)]) {
+                render(e);
+            }
+
             _cmd_list->OMSetStencilRef(0);
 
             _cmd_list->SetPipelineState(
@@ -789,7 +802,16 @@ namespace directx_renderer {
                                                        ps_data);
         ThrowIfFailed(_device->CreateGraphicsPipelineState
                 (&ref_pso, IID_PPV_ARGS(
-                        &_pso_list[static_cast<uint8_t>(layer::reflection)])));
+                        &_pso_list[static_cast<uint8_t>(layer::ref_opaque)])));
+
+        auto ref_trans_pso = pipeline_state::reflection_desc(ie_desc,
+                                                             _countof(ie_desc),
+                                                             _signatures[shader_type::general].Get(),
+                                                             vs_ref_data,
+                                                             ps_data);
+        ThrowIfFailed(_device->CreateGraphicsPipelineState
+                (&ref_trans_pso, IID_PPV_ARGS(
+                        &_pso_list[static_cast<uint8_t>(layer::ref_transparent)])));
 
         auto shadow_pso = pipeline_state::shadow_desc(ie_desc,
                                                       _countof(ie_desc),
@@ -896,6 +918,16 @@ namespace directx_renderer {
         ThrowIfFailed(_device->CreateGraphicsPipelineState(&skin_pso,
                                                            IID_PPV_ARGS(
                                                                    &_pso_list[static_cast<uint8_t>(layer::skinned)])));
+
+        auto vs_skin_ref = DX::ReadData(L"shader\\vs_skin_ref.cso");
+        auto ref_skin_pso = pipeline_state::reflection_desc(ie_desc,
+                                                            _countof(ie_desc),
+                                                            _signatures[shader_type::general].Get(),
+                                                            vs_skin_ref,
+                                                            ps_data);
+        ThrowIfFailed(_device->CreateGraphicsPipelineState
+                (&ref_skin_pso, IID_PPV_ARGS(
+                        &_pso_list[static_cast<uint8_t>(layer::ref_skinned)])));
     }
 
     void dx12_renderer::execute_cmd_list() {

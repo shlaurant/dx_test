@@ -1,6 +1,7 @@
 fxc "shaders.hlsl"  /T vs_5_1 /E "VS_Main" /Fo "release/vs.cso"
-fxc "shaders.hlsl" /D SKINNED  /T vs_5_1 /E "VS_Main" /Fo "release/vs_skin.cso"
-fxc "shaders.hlsl" /D REFLECTION  /T vs_5_1 /E "VS_Main" /Fo "release/vs_ref.cso"
+fxc "shaders.hlsl" /D SKINNED /T vs_5_1 /E "VS_Main" /Fo "release/vs_skin.cso"
+fxc "shaders.hlsl" /D REFLECTION /T vs_5_1 /E "VS_Main" /Fo "release/vs_ref.cso"
+fxc "shaders.hlsl" /D SKINNED /D REFLECTION /T vs_5_1 /E "VS_Main" /Fo "release/vs_skin_ref.cso"
 fxc "shaders.hlsl" /D SHADOW  /T vs_5_1 /E "VS_Main" /Fo "release/vs_sha.cso"
 
 fxc "shaders.hlsl"  /T ps_5_1 /E "PS_Main" /Fo "release/ps.cso"
