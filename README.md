@@ -20,7 +20,7 @@
   
 ## Features
 ### Lighting
-* 지향광, 점광, 점적광, 
+* 지향광, 점광, 점적광, 엠비언트 구현
 * 구성
   * Diffuse Texture + Normal Texture
   * Material
