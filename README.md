@@ -20,6 +20,7 @@
   
 ## Features
 ### Lighting
+* 지향광, 점광, 점적광, 
 * 구성
   * Diffuse Texture + Normal Texture
   * Material
