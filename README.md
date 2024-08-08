@@ -1,4 +1,9 @@
 # DirectX 12 스터디 프로젝트
+## Disclaimer
+This is an old project for study purpose with messy code.
+
+However, it demostrates that I have proficiency in c++ and graphics programming at some degree.
+
 ![thumbnail](https://user-images.githubusercontent.com/20225459/215422714-5e8fa347-6345-4407-9b4e-109040401e00.png)
 
 ## Overview
