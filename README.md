@@ -1,4 +1,4 @@
-# DirectX 12 스터디 프로젝트
+# DirectX 12 Study Project
 ## Disclaimer
 This is an old project for study purpose with messy code.
 
