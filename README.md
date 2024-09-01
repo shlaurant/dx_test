@@ -1,7 +1,7 @@
 # Disclaimer
 This is an old project for study purpose with messy code.
 
-However, it demostrates that I have proficiency in c++ and graphics programming at some degree.
+However, it demonstrates that I have proficiency in c++ and graphics programming at some degree.
 
 # DirectX 12 Study Project
 ![thumbnail](https://user-images.githubusercontent.com/20225459/215422714-5e8fa347-6345-4407-9b4e-109040401e00.png)
